@@ -11,3 +11,8 @@ class MenuBar(tk.Menu):
         self.add_cascade(label='Archivo', menu=file_menu)
         file_menu.add_command(label='Cargar...', command=parent.on_load_image)
 
+        ## Generate menu
+        gen_menu = tk.Menu(self, tearoff=0)
+        self.add_cascade(label='Generar', menu=gen_menu)
+        gen_menu.add_command(label='Cuadrado', command=parent.gen.square)
+

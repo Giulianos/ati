@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter.filedialog import askopenfilename
 from PIL import Image
 
 from widget.imageviewer import ImageViewer
@@ -20,7 +21,9 @@ class App(tk.Tk):
         self.image_viewer.pack()
         
     def on_load_image(self):
-        image_path = 'Lenaclor.ppm'
+        # Get the image path from the dialog
+        # TODO: add RAW filetype (requires special opening)
+        image_path = askopenfilename(filetypes=[('PPM', '.ppm'), ('PGM', '.pgm')])
 
         # Open the image from the file
         self.img_orig = Image.open(image_path)

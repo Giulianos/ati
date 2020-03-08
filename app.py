@@ -2,6 +2,7 @@ import tkinter as tk
 from PIL import Image
 
 from widget.imageviewer import ImageViewer
+from widget.menubar import MenuBar
 
 class App(tk.Tk):
     def __init__(self):
@@ -10,24 +11,21 @@ class App(tk.Tk):
         # Set window title
         self.title('ATI')
 
+        # Add MenuBar
+        menubar = MenuBar(self)
+        self.config(menu=menubar)
+
         # Add ImageViewer
         self.image_viewer = ImageViewer()
         self.image_viewer.pack()
+        
+    def on_load_image(self):
+        image_path = 'Lenaclor.ppm'
 
-        # Add test buttons to load images
-        tk.Button(self, text='Cargar original', command=self.on_load_original).pack()
-        tk.Button(self, text='Cargar procesado', command=self.on_load_processed).pack()
-
-    def on_load_original(self):
         # Open the image from the file
-        self.img_orig = Image.open('Lenaclor.ppm')
+        self.img_orig = Image.open(image_path)
+        self.img_proc = Image.open(image_path)
 
-        # Set the image in the ImageViewer
+        # Set the images in the ImageViewer
         self.image_viewer.set_original(self.img_orig)
-
-    def on_load_processed(self):
-        # Open the image from the file
-        self.img_proc = Image.open('Lenaclor.ppm')
-
-        # Set the image in the ImageViewer
         self.image_viewer.set_processed(self.img_proc)

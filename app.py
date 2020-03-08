@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter.filedialog import askopenfilename
+from tkinter.filedialog import askopenfilename, asksaveasfilename
 from PIL import Image
 
 from widget.imageviewer import ImageViewer
@@ -35,6 +35,17 @@ class App(tk.Tk):
 
         # Load into app
         self.set_original(img)
+
+    def on_save_image(self):
+        # Get the path were the image will be saved
+        image_path = asksaveasfilename(filetypes=[
+            ('PPM', '.ppm'),
+            ('PGM', '.pgm'),
+            ('PNG', '.png'),
+        ])
+
+        # Save using PIL (format is inferred from extension)
+        self.img_proc.save(image_path)
 
     # Sets the original image (setting also the processed)
     def set_original(self, img):

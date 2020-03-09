@@ -4,6 +4,7 @@ from PIL import Image
 
 from widget.imageviewer import ImageViewer
 from widget.menubar import MenuBar
+from widget.statusbar import StatusBar
 
 from algo.gen import Gen
 
@@ -11,19 +12,19 @@ class App(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
 
-        # Set window title
-        self.title('ATI')
-
-        # Add the Gen object (to generate images)
+        # Set window title self.title('ATI') # Add the Gen object (to generate images)
         self.gen = Gen(self)
         
+        # Add StatusBar
+        statusbar = StatusBar(self).grid(row=1)
+
         # Add MenuBar
         menubar = MenuBar(self)
         self.config(menu=menubar)
 
-        # Add ImageViewer
-        self.image_viewer = ImageViewer()
-        self.image_viewer.pack()
+        # Add ImageViewer for original
+        self.image_viewer = ImageViewer('Original')
+        self.image_viewer.grid(row=0)
 
     def on_load_image(self):
         # Get the image path from the dialog
@@ -53,7 +54,7 @@ class App(tk.Tk):
         self.img_proc = img.copy()
 
         # Set the images in the ImageViewer
-        self.image_viewer.set_original(self.img_orig)
-        self.image_viewer.set_processed(self.img_proc)
+        self.image_viewer.set_image(self.img_orig)
+        # self.image_viewer.set_processed(self.img_proc)
 
 

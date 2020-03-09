@@ -32,6 +32,9 @@ class ImageViewer(tk.Frame):
     def set_mouse_handler(self, mouse_handler):
         self.mouse_handler = mouse_handler
 
+    def set_mouse_leave_handler(self, mouse_leave_handler):
+        self.canvas.bind('<Leave>', mouse_leave_handler)
+
     def on_mouse_move(self, event):
         x = self.canvas.canvasx(event.x)
         y = self.canvas.canvasy(event.y)

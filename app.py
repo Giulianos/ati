@@ -37,6 +37,11 @@ class App(tk.Tk):
         self.iv_proc.grid(row=1, column=1, sticky=tk.N+tk.S+tk.E+tk.W)
         tk.Label(self, text='Procesada').grid(row=0, column=1)
         self.iv_proc.set_mouse_handler(self.on_proc_mouse_move)
+        self.iv_proc.set_mouse_leave_handler(self.on_proc_mouse_leave)
+
+        # Add StatusBar
+        self.statusbar = StatusBar(self)
+        self.statusbar.grid(row=2, column=0, columnspan=2, sticky=tk.E+tk.W)
 
     def on_load_image(self):
         # Get the image path from the dialog
@@ -73,6 +78,8 @@ class App(tk.Tk):
     def on_proc_mouse_move(self, canvas, x, y):
         # TODO: show the selected pixel value
         # on the status bar
-        print((x,y))
+        self.statusbar.set_coords((x,y))
 
+    def on_proc_mouse_leave(self, event):
+        self.statusbar.hide_coords()
 

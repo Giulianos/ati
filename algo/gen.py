@@ -16,7 +16,8 @@ class Gen():
         # Paint the corresponding pixels (a 100x100 square in the center)
         for x in range(49, 150):
             for y in range (49, 150):
-                I[x][y] = 255
+                I[y][x] = 255
+
         # Convert the image back to a PIL binary image
         img = Image.fromarray(I).convert('1')
         

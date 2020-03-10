@@ -17,3 +17,9 @@ class StatusBar(tk.Frame):
 
     def hide_coords(self):
         self.coords_label.configure(text='')
+
+    def set_color(self, color):
+        self.color_label.configure(text='Color: {}'.format(color))
+
+    def hide_color(self):
+        self.color_label.configure(text='')

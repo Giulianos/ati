@@ -36,8 +36,8 @@ class ImageViewer(tk.Frame):
         self.canvas.bind('<Leave>', mouse_leave_handler)
 
     def on_mouse_move(self, event):
-        x = self.canvas.canvasx(event.x)
-        y = self.canvas.canvasy(event.y)
+        x = int(self.canvas.canvasx(event.x))
+        y = int(self.canvas.canvasy(event.y))
 
         self.canvas.configure(cursor='crosshair')
 

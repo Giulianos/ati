@@ -7,6 +7,7 @@ from widget.menubar import MenuBar
 from widget.statusbar import StatusBar
 
 from algo.gen import Gen
+from algo.stats import Stats
 
 class App(tk.Tk):
     def __init__(self):
@@ -17,6 +18,9 @@ class App(tk.Tk):
         
         # Add the Gen object (to generate images)
         self.gen = Gen(self)
+
+        # Add Stats object (to get stats of images)
+        self.stats = Stats(self)
         
         # Add MenuBar
         menubar = MenuBar(self)
@@ -76,10 +80,19 @@ class App(tk.Tk):
 
     # Mouse handler for processed image
     def on_proc_mouse_move(self, canvas, x, y):
-        # TODO: show the selected pixel value
-        # on the status bar
-        self.statusbar.set_coords((x,y))
+
+        try:
+            # Get pixel color in mouse position
+            color = self.stats.proc_pixel_value(x, y)
+
+            # Show color and coordinates in statusbar
+            self.statusbar.set_color(color)
+            self.statusbar.set_coords((x,y))
+        except:
+            self.statusbar.hide_coords()
+            self.statusbar.hide_color()
 
     def on_proc_mouse_leave(self, event):
         self.statusbar.hide_coords()
+        self.statusbar.hide_color()
 

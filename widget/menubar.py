@@ -17,3 +17,8 @@ class MenuBar(tk.Menu):
         self.add_cascade(label='Generar', menu=gen_menu)
         gen_menu.add_command(label='Cuadrado', command=parent.gen.square)
 
+        ## Test menu
+        test_menu = tk.Menu(self, tearoff=0)
+        self.add_cascade(label='Test', menu=test_menu)
+        test_menu.add_command(label='Show selection info', command=parent.tools.test_selection)
+

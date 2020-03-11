@@ -8,6 +8,9 @@ from widget.statusbar import StatusBar
 
 from algo.gen import Gen
 from algo.stats import Stats
+from algo.tools import Tools
+
+from mouse import MouseSelection
 
 class App(tk.Tk):
     def __init__(self):
@@ -21,6 +24,12 @@ class App(tk.Tk):
 
         # Add Stats object (to get stats of images)
         self.stats = Stats(self)
+
+        # Add Tools object (to manipulate images)
+        self.tools = Tools(self)
+
+        # Add MouseSelection object (to handle requests for mouse selections)
+        self.mouse_selection = MouseSelection()
         
         # Add MenuBar
         menubar = MenuBar(self)
@@ -42,6 +51,7 @@ class App(tk.Tk):
         tk.Label(self, text='Procesada').grid(row=0, column=1)
         self.iv_proc.set_mouse_handler(self.on_proc_mouse_move)
         self.iv_proc.set_mouse_leave_handler(self.on_proc_mouse_leave)
+        self.iv_proc.set_mouse_selection(self.mouse_selection)
 
         # Add StatusBar
         self.statusbar = StatusBar(self)

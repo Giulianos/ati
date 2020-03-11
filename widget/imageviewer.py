@@ -21,13 +21,23 @@ class ImageViewer(tk.Frame):
         
         # Bind mouse event handler
         self.canvas.bind('<Motion>', self.on_mouse_move)
+        self.canvas.bind('<Button-1>', self.on_mouse_press)
+        self.canvas.bind('<ButtonRelease-1>', self.on_mouse_release)
+
         self.mouse_handler = None
+        self.mouse_selection = None
 
     def set_image(self, pil_img):
         # Create the image in the canvas
         self.photo_image = ImageTk.PhotoImage(pil_img)
         self.canvas.create_image(0,0, anchor='nw', image=self.photo_image)
         self.canvas.config(scrollregion=self.canvas.bbox(tk.ALL))
+
+    def get_mouse_pos(self, event):
+        x = int(self.canvas.canvasx(event.x))
+        y = int(self.canvas.canvasy(event.y))
+
+        return (x,y)
 
     def set_mouse_handler(self, mouse_handler):
         self.mouse_handler = mouse_handler
@@ -36,10 +46,23 @@ class ImageViewer(tk.Frame):
         self.canvas.bind('<Leave>', mouse_leave_handler)
 
     def on_mouse_move(self, event):
-        x = int(self.canvas.canvasx(event.x))
-        y = int(self.canvas.canvasy(event.y))
-
         self.canvas.configure(cursor='crosshair')
 
         if self.mouse_handler != None:
-            self.mouse_handler(self, x, y)
+            mouse_pos = self.get_mouse_pos(event)
+            self.mouse_handler(self, mouse_pos[0], mouse_pos[1])
+
+    def set_mouse_selection(self, mouse_selection):
+        self.mouse_selection = mouse_selection
+
+    # This is called when drag starts
+    def on_mouse_press(self, event):
+        if self.mouse_selection != None and self.mouse_selection.is_enabled():
+           mouse_pos = self.get_mouse_pos(event)
+           self.mouse_selection.start_drag(mouse_pos)
+
+    # This is called when drags ends
+    def on_mouse_release(self, event):
+        if self.mouse_selection != None and self.mouse_selection.is_enabled():
+            mouse_pos = self.get_mouse_pos(event)
+            self.mouse_selection.end_drag(mouse_pos)

@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter.filedialog import askopenfilename, asksaveasfilename
+from tkinter.simpledialog import askinteger
 from PIL import Image
 
 from widget.imageviewer import ImageViewer
@@ -64,9 +65,15 @@ class App(tk.Tk):
 
         # Open the image from the file
         if ".RAW" in image_path:
+            w = askinteger("Raw Image", "Width: ",
+                  minvalue=2,
+                  maxvalue=1000)
+            h = askinteger("Raw Image", "Height: ",
+                  minvalue=2,
+                  maxvalue=1000)
             with open(image_path, "rb") as binary_file:
                 databytes = binary_file.read()
-                img = Image.frombytes("L", (290,207), databytes, decoder_name='raw')
+                img = Image.frombytes("L", (w,h), databytes, decoder_name='raw')
         else: 
             img = Image.open(image_path)
 

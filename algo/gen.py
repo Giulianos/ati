@@ -1,5 +1,6 @@
 import numpy as np
 
+from tkinter.simpledialog import askinteger
 from PIL import Image
 
 class Gen():
@@ -31,14 +32,19 @@ class Gen():
         self.app_ref.set_original(img)
 
     def circle(self):
+        # Ask integer for r, max 200
+        r = askinteger("Circle", "Radius: ",
+                  initialvalue=50,
+                  minvalue=2,
+                  maxvalue=100)
         #Generate grayscale image
         img = Image.new('L', (200,200))
         # to array
         I = np.array(img)
-        # Paint pixels (center 100x100 and radius 50)
+        # Paint pixels (center 100x100 and radius r)
         for x in range(0, 200):
             for y in range(0, 200):
-                if(self.inside_circle_rad(x, y, 100, 100, 50)):
+                if(self.inside_circle_rad(x, y, 100, 100, r)):
                     I[y][x] = 255
 
         # Convert the image back to a PIL binary image

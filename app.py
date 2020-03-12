@@ -88,6 +88,11 @@ class App(tk.Tk):
         self.iv_orig.set_image(self.img_orig)
         self.iv_proc.set_image(self.img_proc)
 
+    # Sets the processed image (use this to apply any modification to the image)
+    def set_processed(self, img):
+        self.img_proc = img
+        self.iv_proc.set_image(self.img_proc)
+
     # Mouse handler for processed image
     def on_proc_mouse_move(self, canvas, x, y):
 

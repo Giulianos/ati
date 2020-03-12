@@ -21,4 +21,5 @@ class MenuBar(tk.Menu):
         test_menu = tk.Menu(self, tearoff=0)
         self.add_cascade(label='Test', menu=test_menu)
         test_menu.add_command(label='Show selection info', command=parent.tools.test_selection)
+        test_menu.add_command(label='Pintar seleccion', command=parent.tools.paint_selection)
 

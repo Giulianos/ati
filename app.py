@@ -60,10 +60,15 @@ class App(tk.Tk):
     def on_load_image(self):
         # Get the image path from the dialog
         # TODO: add RAW filetype (requires special opening)
-        image_path = askopenfilename(filetypes=[('PPM', '.ppm'), ('PGM', '.pgm')])
+        image_path = askopenfilename(filetypes=[('PPM', '.ppm'), ('PGM', '.pgm'), ('RAW', '.raw')])
 
         # Open the image from the file
-        img = Image.open(image_path)
+        if ".RAW" in image_path:
+            with open(image_path, "rb") as binary_file:
+                databytes = binary_file.read()
+                img = Image.frombytes("L", (290,207), databytes, decoder_name='raw')
+        else: 
+            img = Image.open(image_path)
 
         # Load into app
         self.set_original(img)

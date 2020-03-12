@@ -18,6 +18,9 @@ class ImageViewer(tk.Frame):
         self.canvas.grid(row=0, column=0, sticky=tk.N+tk.S+tk.E+tk.W)
         xscroll.config(command=self.canvas.xview)
         yscroll.config(command=self.canvas.yview)
+
+        # Selection rectangle
+        self.selection_rect = None
         
         # Bind mouse event handler
         self.canvas.bind('<Motion>', self.on_mouse_move)
@@ -52,6 +55,20 @@ class ImageViewer(tk.Frame):
             mouse_pos = self.get_mouse_pos(event)
             self.mouse_handler(self, mouse_pos[0], mouse_pos[1])
 
+        # Show selection box if it's enabled
+        try:
+            startx, starty = self.mouse_selection.get_start()
+            endx, endy = mouse_pos
+
+            if self.selection_rect == None:
+                self.selection_rect = self.canvas.create_rectangle(
+                        startx, starty, endx, endy,
+                        outline='red')
+            else:
+                self.canvas.coords(self.selection_rect, startx, starty, endx, endy)
+        except:
+            pass
+
     def set_mouse_selection(self, mouse_selection):
         self.mouse_selection = mouse_selection
 
@@ -66,3 +83,5 @@ class ImageViewer(tk.Frame):
         if self.mouse_selection != None and self.mouse_selection.is_enabled():
             mouse_pos = self.get_mouse_pos(event)
             self.mouse_selection.end_drag(mouse_pos)
+            self.canvas.delete(self.selection_rect)
+            self.selection_rect = None

@@ -39,3 +39,15 @@ class Tools():
         self.app_ref.set_processed(img)
 
 
+    def cut(self):
+        self.app_ref.mouse_selection.request_selection(self.handle_cut)
+
+    def handle_cut(self, start, end):
+        img = self.app_ref.img_proc
+        
+        x1, y1 = start
+        x2, y2 = end
+
+        img = img.crop((x1,y1,x2,y2))
+
+        self.app_ref.set_processed(img)

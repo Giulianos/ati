@@ -26,4 +26,5 @@ class MenuBar(tk.Menu):
         test_menu.add_command(label='Show selection info', command=parent.tools.test_selection)
         test_menu.add_command(label='Pintar seleccion', command=parent.tools.paint_selection)
         test_menu.add_command(label='Promedio de pixeles', command=parent.stats.region_mean_value)
+        test_menu.add_command(label='Cortar imagen', command=parent.tools.cut)
 

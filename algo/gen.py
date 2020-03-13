@@ -53,3 +53,24 @@ class Gen():
         # Set the image as the original (and processed)
         self.app_ref.set_original(img)
 
+    # Converts an x coordinte to the
+    # corresponding gray color
+    def position_to_gray(self, x, img_width):
+        return int(x * (255.0/img_width))
+
+    def gray_gradient(self):
+        img_width = 200
+        # Generate grayscale image
+        img = Image.new('L', (img_width, img_width))
+        # to array
+        I = np.array(img)
+        # Paint pixels using a linear horizontal gradient
+        for x in range(0, img_width):
+            for y in range(0, img_width):
+                I[y][x] = self.position_to_gray(x, img_width)
+
+        # convert back to PIL
+        img = Image.fromarray(I)
+
+        # Set as the original image
+        self.app_ref.set_original(img)

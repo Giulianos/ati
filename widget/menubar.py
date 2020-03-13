@@ -17,6 +17,7 @@ class MenuBar(tk.Menu):
         self.add_cascade(label='Generar', menu=gen_menu)
         gen_menu.add_command(label='Cuadrado', command=parent.gen.square)
         gen_menu.add_command(label='Circulo', command=parent.gen.circle)
+        gen_menu.add_command(label='Degrade de grises', command=parent.gen.gray_gradient)
 
         ## Test menu
         test_menu = tk.Menu(self, tearoff=0)

@@ -74,3 +74,37 @@ class Gen():
 
         # Set as the original image
         self.app_ref.set_original(img)
+
+    # converts an x coordinate to the
+    # corresponding rgb tuple
+    def position_to_rgb(self, x, img_width):
+        # Generate colors using cos:
+        # https://www.desmos.com/calculator/lakvddkg1g
+        r = np.cos((1.0*x/img_width)*np.pi)*255
+        g = np.cos((1.0*x/img_width)*np.pi - 0.5*np.pi)*255
+        b = np.cos((1.0*x/img_width)*np.pi - np.pi)*255
+
+        r = 0 if r < 0 else r
+        g = 0 if g < 0 else g
+        b = 0 if b < 0 else b
+
+        return (r,g,b)
+
+    def color_gradient(self):
+        img_width = 200
+        # Generate grayscale image
+        img = Image.new('RGB', (img_width, img_width))
+        # to array
+        I = np.array(img)
+        # Paint pixels using a linear horizontal gradient
+        for x in range(0, img_width):
+            for y in range(0, img_width):
+                I[y][x] = self.position_to_rgb(x, img_width)
+
+        # convert back to PIL
+        img = Image.fromarray(I)
+
+        # Set as the original image
+        self.app_ref.set_original(img)
+
+

@@ -10,6 +10,7 @@ from widget.statusbar import StatusBar
 from algo.gen import Gen
 from algo.stats import Stats
 from algo.tools import Tools
+from algo.functions import Functions
 
 from mouse import MouseSelection
 
@@ -28,6 +29,8 @@ class App(tk.Tk):
 
         # Add Tools object (to manipulate images)
         self.tools = Tools(self)
+
+        self.funcs = Functions(self)
 
         # Add MouseSelection object (to handle requests for mouse selections)
         self.mouse_selection = MouseSelection()

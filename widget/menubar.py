@@ -20,6 +20,11 @@ class MenuBar(tk.Menu):
         gen_menu.add_command(label='Degrade de grises', command=parent.gen.gray_gradient)
         gen_menu.add_command(label='Degrade de colores', command=parent.gen.color_gradient)
 
+        ## Functions menu
+        func_menu = tk.Menu(self, tearoff=0)
+        self.add_cascade(label='Funciones', menu=func_menu)
+        func_menu.add_command(label='Negativo', command=parent.funcs.negative)
+
         ## Test menu
         test_menu = tk.Menu(self, tearoff=0)
         self.add_cascade(label='Test', menu=test_menu)

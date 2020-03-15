@@ -37,6 +37,8 @@ class Gen():
                   initialvalue=50,
                   minvalue=2,
                   maxvalue=100)
+        if type(r) != int:
+            r = 50
         #Generate grayscale image
         img = Image.new('L', (200,200))
         # to array

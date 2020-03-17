@@ -61,7 +61,7 @@ class App(tk.Tk):
         self.statusbar = StatusBar(self)
         self.statusbar.grid(row=2, column=0, columnspan=2, sticky=tk.E+tk.W)
 
-    def on_load_image(self):
+    def load_image_from_file(self):
         # Get the image path from the dialog
         # TODO: add RAW filetype (requires special opening)
         image_path = askopenfilename(filetypes=[('PPM', '.ppm'), ('PGM', '.pgm'), ('RAW', '.raw')])
@@ -80,8 +80,11 @@ class App(tk.Tk):
         else: 
             img = Image.open(image_path)
 
+        return img
+
+    def on_load_image(self):
         # Load into app
-        self.set_original(img)
+        self.set_original(self.load_image_from_file())
 
     def on_save_image(self):
         # Get the path were the image will be saved

@@ -1,7 +1,10 @@
+import matplotlib
+matplotlib.use("TkAgg")
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+from matplotlib.figure import Figure
+
 import numpy as np
-
 from PIL import Image
-
 import tkinter as tk
 
 class Stats():
@@ -73,3 +76,47 @@ class Stats():
         avg /= pixel_count
         
         return avg
+    
+    def show_histogram(self):
+        # Create histograms
+        I_orig = np.array(self.app_ref.img_orig.convert('L'))
+        hist_orig = calculate_histogram(I_orig)
+        
+        I_proc = np.array(self.app_ref.img_proc.convert('L'))
+        hist_proc = calculate_histogram(I_proc)
+
+        # Create plot window
+        plot_window = tk.Toplevel()
+
+        # Create figure
+        fig = Figure(figsize=(10,4))
+        ax_orig = fig.add_subplot(121)
+        ax_proc = fig.add_subplot(122)
+
+        ax_orig.plot(np.arange(256),hist_orig)
+        ax_orig.set_title('Original')
+
+        ax_proc.plot(np.arange(256),hist_proc)
+        ax_proc.set_title('Procesada')
+
+        # Create canvas in plot window
+        canvas = FigureCanvasTkAgg(fig, master=plot_window)
+        canvas.show()
+        canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1.0)
+        canvas.draw()
+
+
+# Calculate histogram for grayscale images
+def calculate_histogram(img_array):
+    bins = np.zeros(256)
+    pixel_count = 0
+
+    for pixel in np.nditer(img_array):
+        bins[pixel] += 1
+        pixel_count += 1
+
+    # Convert to relative frequencies
+    bins /= pixel_count
+
+    return bins
+

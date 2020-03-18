@@ -27,12 +27,13 @@ class MenuBar(tk.Menu):
         func_menu.add_command(label='Sumar otra imagen', command=parent.funcs.sum_other_image)
         func_menu.add_command(label='Restar otra imagen', command=parent.funcs.substract_other_image)
         func_menu.add_command(label='Multiplicar por otra imagen', command=parent.funcs.multiply_by_other_image)
+        func_menu.add_command(label='Pintar seleccion', command=parent.tools.paint_selection)
+        func_menu.add_command(label='Cortar imagen', command=parent.tools.cut)
 
-        ## Test menu
-        test_menu = tk.Menu(self, tearoff=0)
-        self.add_cascade(label='Test', menu=test_menu)
-        test_menu.add_command(label='Show selection info', command=parent.tools.test_selection)
-        test_menu.add_command(label='Pintar seleccion', command=parent.tools.paint_selection)
-        test_menu.add_command(label='Promedio de pixeles', command=parent.stats.region_mean_value)
-        test_menu.add_command(label='Cortar imagen', command=parent.tools.cut)
+        ## Info menu
+        info_menu = tk.Menu(self, tearoff=0)
+        self.add_cascade(label='Info', menu=info_menu)
+        info_menu.add_command(label='Promedio de pixeles', command=parent.stats.region_mean_value)
+        info_menu.add_command(label='Mostrar histograma', command=parent.stats.show_histogram)
+
 

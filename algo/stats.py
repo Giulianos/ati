@@ -7,6 +7,8 @@ import numpy as np
 from PIL import Image
 import tkinter as tk
 
+from algo.utils import calculate_histogram
+
 class Stats():
     def __init__(self, app_ref):
         self.app_ref = app_ref
@@ -106,17 +108,4 @@ class Stats():
         canvas.draw()
 
 
-# Calculate histogram for grayscale images
-def calculate_histogram(img_array):
-    bins = np.zeros(256)
-    pixel_count = 0
-
-    for pixel in np.nditer(img_array):
-        bins[pixel] += 1
-        pixel_count += 1
-
-    # Convert to relative frequencies
-    bins /= pixel_count
-
-    return bins
 

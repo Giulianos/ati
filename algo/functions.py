@@ -2,6 +2,8 @@ import numpy as np
 
 from PIL import Image
 
+from algo.utils import calculate_histogram
+
 class Functions():
     def __init__(self, app_ref):
         self.app_ref = app_ref
@@ -59,8 +61,6 @@ class Functions():
         self.app_ref.set_processed(img)
 
 
-
-
     # This function maps arbitrary
     # pixel values to 0-max_value
     def remap_image_array(self, I, max_value=255):
@@ -74,3 +74,39 @@ class Functions():
                 return I
 
         return (I-np.min(I))/np.ptp(I)*max_value
+
+
+    def equalize_histogram(self):
+        # Image to array
+        I = np.array(self.app_ref.img_proc.convert('L'))
+
+        # Calculate histogram for image
+        hist = calculate_histogram(I, False)
+
+        # Define cdf
+        cdf = lambda k: hist[:k+1].sum()
+
+        # Find cdfmin
+        cdfmin = None
+        for j in range(256):
+            cdfmin_temp = cdf(j)
+            if cdfmin_temp != 0:
+                cdfmin = cdfmin_temp
+                break
+        
+        # Count total pixels in image
+        N = cdf(255)
+
+        # Create transformation
+        t = np.zeros(256)
+        for j in range(256):
+            t[j] = int((cdf(j)-cdfmin)/(N-cdfmin)*255)
+        # Apply transformation
+        for pixel in np.nditer(I, op_flags=['readwrite']):
+            pixel[...] = t[pixel]
+
+        # Set equalized image
+        img = Image.fromarray(I)
+        self.app_ref.set_processed(img)
+
+

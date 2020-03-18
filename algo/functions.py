@@ -30,6 +30,9 @@ class Functions():
 
     def substract_other_image(self):
         self.apply_binary_op(lambda p1,p2: p1-p2)
+
+    def multiply_by_other_image(self):
+        self.apply_binary_op(lambda p1,p2: p1*p2)
         
     def apply_binary_op(self, op):
         # load other image

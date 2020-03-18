@@ -25,6 +25,7 @@ class MenuBar(tk.Menu):
         self.add_cascade(label='Funciones', menu=func_menu)
         func_menu.add_command(label='Negativo', command=parent.funcs.negative)
         func_menu.add_command(label='Sumar otra imagen', command=parent.funcs.sum_other_image)
+        func_menu.add_command(label='Restar otra imagen', command=parent.funcs.substract_other_image)
 
         ## Test menu
         test_menu = tk.Menu(self, tearoff=0)

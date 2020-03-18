@@ -26,6 +26,12 @@ class Functions():
         self.app_ref.set_processed(img)
 
     def sum_other_image(self):
+        self.apply_binary_op(lambda p1,p2: p1+p2)
+
+    def substract_other_image(self):
+        self.apply_binary_op(lambda p1,p2: p1-p2)
+        
+    def apply_binary_op(self, op):
         # load other image
         img_other = self.app_ref.load_image_from_file()
 
@@ -41,13 +47,15 @@ class Functions():
 
         # Perform function pixel by pixel
         for pix1, pix2 in np.nditer([I1, I2], op_flags=['readwrite']):
-            pix1[...] += pix2
+            pix1[...] += op(pix1, pix2)
 
 
         # Remap image to 0-255
         img = Image.fromarray(self.remap_image_array(I1))
 
         self.app_ref.set_processed(img)
+
+
 
 
     # This function maps arbitrary

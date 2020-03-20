@@ -52,7 +52,7 @@ class Functions():
 
         # Perform function pixel by pixel
         for pix1, pix2 in np.nditer([I1, I2], op_flags=['readwrite']):
-            pix1[...] += op(pix1, pix2)
+            pix1[...] = op(pix1, pix2)
 
 
         # Remap image to 0-255

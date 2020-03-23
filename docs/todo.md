@@ -1,7 +1,7 @@
 # TP 1
 - [ ] Implementar las siguientes funciones:
 	- [x] Suma, resta y producto de imágenes
-	- [ ] Producto de una imagen por un escalar
+	- [x] Producto de una imagen por un escalar (Creo que esta bien hecho)
 	- [ ] Compresión del rango dinámico
 	- [ ] Función de potencia γ
 - [x] Implementar una función que devuelva el negativo de una imágen

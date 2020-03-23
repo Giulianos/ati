@@ -2,6 +2,8 @@ import numpy as np
 
 from PIL import Image
 
+from tkinter.simpledialog import askfloat
+
 from algo.utils import calculate_histogram
 
 class Functions():
@@ -21,6 +23,28 @@ class Functions():
                 pixel[...] = 0 if pixel else 255
             else:
                 pixel[...] = np.subtract(255, pixel)
+
+        img = Image.fromarray(I)
+        if bands == ('1',):
+            img = img.convert('1')
+        self.app_ref.set_processed(img)
+    
+    def multiply_by_scalar(self):
+        scalar = askfloat("Multiplicación por escalar", "Escalar: ",
+                  initialvalue=1,
+                  minvalue=0,
+                  maxvalue=255)
+
+        img = self.app_ref.img_proc
+        bands = img.getbands()
+        if bands == ('1',):
+            img = img.convert('L')
+
+        I = np.array(img)
+
+        for pixel in np.nditer(I, op_flags=['readwrite']):
+            if bands == ('1',):
+                pixel[...] = np.multiply(scalar, pixel)
 
         img = Image.fromarray(I)
         if bands == ('1',):

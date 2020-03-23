@@ -33,6 +33,13 @@ class MenuBar(tk.Menu):
         func_menu.add_command(label='Pintar seleccion', command=parent.tools.paint_selection)
         func_menu.add_command(label='Cortar imagen', command=parent.tools.cut)
 
+        ## Noise cascade in functions menu
+        func_menu_ruido = tk.Menu(self, tearoff=0)
+        func_menu.add_cascade(label='Agregar Ruido', menu=func_menu_ruido)
+        func_menu_ruido.add_command(label='Gaussiano Aditivo', command=parent.funcs.noise_additive_gauss)
+        func_menu_ruido.add_command(label='Raleigh Multiplicativo', command=parent.funcs.noise_multiplicative_raleigh)
+        func_menu_ruido.add_command(label='Exponencial Multiplicativo', command=parent.funcs.noise_multiplicative_exp)
+
         ## Info menu
         info_menu = tk.Menu(self, tearoff=0)
         self.add_cascade(label='Info', menu=info_menu)

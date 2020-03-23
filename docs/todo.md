@@ -9,3 +9,20 @@
 - [ ] Implementar una función que aplique un umbral a una imágen, devolviendo una imagen binaria. El umbral debe ser un parametro de la interface.
 - [x] Implementart una función que resuelva la ecualizacion del histograma.
 - [ ] Aplicar la ecualización del histograma por segunda vez a la misma imágen. Observar el resultado y dar una expliación de lo sucedido.
+- [ ] Definir libreria a utilizar para generadores de numeros aleatorios con las siguientes distribuciones:
+	- [ ] Gaussiana con σ y μ variables
+	- [ ] Rayleigh con ξ
+	- [ ] Exponencial con λ
+- [ ] Implementar generadores de ruido sobre una imagen:
+	- [ ] Gaussiano aditivo
+	- [ ] Rayleigh multiplicativo
+	- [ ] Exponencial multiplicativo
+- [ ] Implementar generador de ruido Sal y Pimienta de densidad variable
+- [ ] Implementar "ventana deslizante" que se aplique sobre una imagen con mascara de tamaño variable, cuadrada:
+	- [ ] Filtro de la media
+	- [ ] Filtro de la mediana
+	- [ ] Filtro de la mediana ponderada, solo 3x3
+	- [ ] Filtro de Gauss con σ y μ variables
+	- [ ] Realce de bordes
+	
+

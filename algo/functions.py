@@ -59,7 +59,7 @@ class Functions():
 
     def multiply_by_other_image(self):
         self.apply_binary_op(lambda p1,p2: p1*p2)
-        
+
     def apply_binary_op(self, op):
         # load other image
         img_other = self.app_ref.load_image_from_file()
@@ -132,5 +132,40 @@ class Functions():
         # Set equalized image
         img = Image.fromarray(I)
         self.app_ref.set_processed(img)
+
+    def gen_gauss(self):
+        generator = np.random.default_rng()
+        mu = askfloat("Distribucion Gaussiana", "Variable μ: ",
+                  initialvalue=1)
+        desvio = askfloat("Distribucion Gaussiana", "Variable σ: ",
+                  initialvalue=1)
+        return generator.normal(mu, desvio)
+
+    def gen_raleigh(self):
+        generator = np.random.default_rng()
+        xhi = askfloat("Distribucion Raleigh", "Variable ξ: ",
+                  initialvalue=1)
+        return generator.rayleigh(xhi)
+
+    def gen_exp(self):
+        generator = np.random.default_rng()
+        lamb = askfloat("Distribucion Exponencial", "Variable λ: ",
+                  initialvalue=1)
+        return generator.exponential(1/lamb)
+
+    def noise_additive_gauss(self):
+        random_number = self.gen_gauss()
+        print(random_number)
+        return 0
+    
+    def noise_multiplicative_raleigh(self):
+        random_number = self.gen_raleigh()
+        print(random_number)
+        return 0
+    
+    def noise_multiplicative_exp(self):
+        random_number = self.gen_exp()
+        print(random_number)
+        return 0
 
 

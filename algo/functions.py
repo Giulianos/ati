@@ -2,7 +2,7 @@ import numpy as np
 
 from PIL import Image
 
-from tkinter.simpledialog import askfloat
+from tkinter.simpledialog import askfloat, askinteger
 
 from algo.utils import calculate_histogram
 
@@ -133,39 +133,83 @@ class Functions():
         img = Image.fromarray(I)
         self.app_ref.set_processed(img)
 
-    def gen_gauss(self):
-        generator = np.random.default_rng()
+    def gen_gauss(self, mu, desvio):
+        return np.random.normal(mu, desvio)
+
+    def gen_raleigh(self, xhi):
+        return np.random.rayleigh(xhi)
+
+    def gen_exp(self, lamb):
+        return np.random.exponential(1/lamb)
+    
+    def gen_uniform(self, min, max):
+        return np.random.uniform(min, max)
+
+    def noise_additive_gauss(self):
+        percentage = askinteger("Exponential Noise", "Porcentaje a contaminar: ",
+                    initialvalue=30)
         mu = askfloat("Distribucion Gaussiana", "Variable μ: ",
                   initialvalue=1)
         desvio = askfloat("Distribucion Gaussiana", "Variable σ: ",
                   initialvalue=1)
-        return generator.normal(mu, desvio)
 
-    def gen_raleigh(self):
-        generator = np.random.default_rng()
-        xhi = askfloat("Distribucion Raleigh", "Variable ξ: ",
-                  initialvalue=1)
-        return generator.rayleigh(xhi)
-
-    def gen_exp(self):
-        generator = np.random.default_rng()
-        lamb = askfloat("Distribucion Exponencial", "Variable λ: ",
-                  initialvalue=1)
-        return generator.exponential(1/lamb)
-
-    def noise_additive_gauss(self):
-        random_number = self.gen_gauss()
-        print(random_number)
+        self.apply_noise(percentage, "gauss", "add", mu, desvio)
+        
+        print("Additive Gauss applied!")
         return 0
     
     def noise_multiplicative_raleigh(self):
-        random_number = self.gen_raleigh()
-        print(random_number)
+        percentage = askinteger("Exponential Noise", "Porcentaje a contaminar: ",
+                    initialvalue=30)
+        xhi = askfloat("Distribucion Raleigh", "Variable ξ: ",
+                  initialvalue=1)
+        
+        self.apply_noise(percentage, "raleigh", "mul", xhi, None)
+
+        print("Multiplicative Raleigh applied!")
         return 0
     
     def noise_multiplicative_exp(self):
-        random_number = self.gen_exp()
-        print(random_number)
+        percentage = askinteger("Exponential Noise", "Porcentaje a contaminar: ",
+                    initialvalue=30)
+        lamb = askfloat("Distribucion Exponencial", "Variable λ: ",
+                  initialvalue=1)
+
+        self.apply_noise(percentage, "exp", "mul", lamb, None)
+
+        print("Multiplicative exponential applied!")
         return 0
+
+    def apply_noise(self, percentage, op_operation, op_type, var1, var2):
+        #iter over image
+        img = self.app_ref.img_proc
+        bands = img.getbands()
+        if bands == ('1',):
+            img = img.convert('L')
+
+        I = np.array(img)
+
+        for pixel in np.nditer(I, op_flags=['readwrite']):
+            noised = self.gen_uniform(0,100)
+            if noised <= percentage:
+                if op_operation == "exp":
+                    random_number = self.gen_exp(var1)
+                elif op_operation == "raleigh":
+                    random_number = self.gen_raleigh(var1)
+                elif op_operation == "gauss":
+                    random_number = self.gen_gauss(var1, var2)
+                
+                if op_type == "mul":
+                    pixel[...] = pixel*random_number
+                elif op_type == "add":
+                    pixel[...] = pixel+random_number
+            
+            #ToDo for RGB
+
+        img = Image.fromarray(I)
+        if bands == ('1',):
+            img = img.convert('1')
+        self.app_ref.set_processed(img)
+
 
 

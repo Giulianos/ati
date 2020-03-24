@@ -173,7 +173,6 @@ class Functions():
             img = img.convert('1')
         self.app_ref.set_processed(img)
 
-
     def noise_additive_gauss(self):
         percentage = askinteger("Ruido gaussiano aditivo", "Porcentaje a contaminar: ",
                     initialvalue=30)
@@ -240,5 +239,50 @@ class Functions():
             img = img.convert('1')
         self.app_ref.set_processed(img)
 
+    def mask(self):
+        mask_dim = askinteger("Filtro de mascara", "Tamaño de la mascara (nxn): ", initialvalue = 3)
 
+        #dependiendo del tipo de filtro hago un array con el peso correspondiente
+        mask = np.ones((mask_dim, mask_dim))
+        #pesos para el mean filter (dependiendo cual pidan, le cambiamos los pesos)
+        for val in mask:
+            val = 1
+        #ponderacion total
+        total_weight = np.sum(mask)
 
+        #iter over image
+        img = self.app_ref.img_proc
+        bands = img.getbands()
+        if bands == ('1',):
+            img = img.convert('L')
+
+        #imagen a procesar
+        I = np.array(img)
+        #imagen que no cambia
+        I_ref = np.array(img)
+
+        width, height = img.size
+        for x in range(width-1):
+            for y in range(height-1):
+                mask_aux = np.zeros((mask_dim, mask_dim))
+                for i in range(mask_dim):
+                    for j in range(mask_dim):
+                        coordx = x+i-np.floor(mask_dim/2)
+                        coordy = y+j-np.floor(mask_dim/2)
+                        if coordx < 0 or coordy < 0 or coordx >= width or coordy >= height:
+                            #me fui entonces tengo que tomar una decision de las 4 propuestas
+                            mask_aux[i,j] = 0 
+                        else:
+                            #estoy dentro de la ponderacion
+                            #print("coordx="+str(coordx))
+                            #print("coordy="+str(coordy))
+                            mask_aux[i, j] = I_ref[int(coordy), int(coordx)] * mask[i,j] * (1/total_weight)
+                
+                #termine de armar la mascara, cambio el valor del pixel
+                I[y,x] = np.sum(mask_aux)
+
+        img = Image.fromarray(I)
+        if bands == ('1',):
+            img = img.convert('1')
+        self.app_ref.set_processed(img)
+        print("Mask Applied!")

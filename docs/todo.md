@@ -17,9 +17,9 @@
 	- [x] Gaussiano aditivo
 	- [x] Rayleigh multiplicativo
 	- [x] Exponencial multiplicativo
-- [ ] Implementar generador de ruido Sal y Pimienta de densidad variable
+- [x] Implementar generador de ruido Sal y Pimienta de densidad variable
 - [ ] Implementar "ventana deslizante" que se aplique sobre una imagen con mascara de tamaño variable, cuadrada:
-	- [ ] Filtro de la media
+	- [x] Filtro de la media
 	- [ ] Filtro de la mediana
 	- [ ] Filtro de la mediana ponderada, solo 3x3
 	- [ ] Filtro de Gauss con σ y μ variables

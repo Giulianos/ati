@@ -145,8 +145,37 @@ class Functions():
     def gen_uniform(self, min, max):
         return np.random.uniform(min, max)
 
+    def noise_snp(self):
+        p0 = askinteger("Ruido sal y pimienta", "Porcentaje inferior: ",
+                    initialvalue=10)
+        p1 = askinteger("Ruido sal y pimienta", "Porcentaje superior: ",
+                    initialvalue=10)
+        
+        #iter over image
+        img = self.app_ref.img_proc
+        bands = img.getbands()
+        if bands == ('1',):
+            img = img.convert('L')
+
+        I = np.array(img)
+
+        for pixel in np.nditer(I, op_flags=['readwrite']):
+            noised = self.gen_uniform(0,100)
+            if noised <= p0:
+                pixel[...] = 0
+            elif noised >= (100-p1):
+                pixel[...] = 255
+            
+            #ToDo for RGB
+
+        img = Image.fromarray(I)
+        if bands == ('1',):
+            img = img.convert('1')
+        self.app_ref.set_processed(img)
+
+
     def noise_additive_gauss(self):
-        percentage = askinteger("Exponential Noise", "Porcentaje a contaminar: ",
+        percentage = askinteger("Ruido gaussiano aditivo", "Porcentaje a contaminar: ",
                     initialvalue=30)
         mu = askfloat("Distribucion Gaussiana", "Variable μ: ",
                   initialvalue=1)
@@ -159,7 +188,7 @@ class Functions():
         return 0
     
     def noise_multiplicative_raleigh(self):
-        percentage = askinteger("Exponential Noise", "Porcentaje a contaminar: ",
+        percentage = askinteger("Ruido raleigh multiplicativo", "Porcentaje a contaminar: ",
                     initialvalue=30)
         xhi = askfloat("Distribucion Raleigh", "Variable ξ: ",
                   initialvalue=1)
@@ -170,7 +199,7 @@ class Functions():
         return 0
     
     def noise_multiplicative_exp(self):
-        percentage = askinteger("Exponential Noise", "Porcentaje a contaminar: ",
+        percentage = askinteger("Ruido exponencial multiplicativo", "Porcentaje a contaminar: ",
                     initialvalue=30)
         lamb = askfloat("Distribucion Exponencial", "Variable λ: ",
                   initialvalue=1)

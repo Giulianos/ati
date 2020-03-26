@@ -253,12 +253,16 @@ class Functions():
     def median_mask(self):
         self.mask(np.median)
 
+    def wmedian_mask(self):
+        self.mask(weightedMedianFilter, 3)
+
     # maskFunc is the function that calculates
     # the value of the pixel based on the neighbor
     # pixels on the mask
-    def mask(self, maskFunc):
-
-        mask_dim = askinteger("Filtro de mascara", "Tamaño de la mascara (nxn): ", initialvalue = 3)
+    def mask(self, maskFunc, mask_dim=None):
+        
+        if mask_dim == None:
+            mask_dim = askinteger("Filtro de mascara", "Tamaño de la mascara (nxn): ", initialvalue = 3)
 
         #dependiendo del tipo de filtro hago un array con el peso correspondiente
         # lo vamos armando a medida que pasamos por los pixeles (algunos filtros
@@ -342,3 +346,15 @@ def highPassFilter(mask):
 
     return np.sum(mask*weights)
 
+def weightedMedianFilter(mask):
+    if mask.shape[0] != 3:
+        print("Im hardcoded for 3x3 masks!")
+        return
+    reps = np.array([[1,2,1], [2,4,2], [1,2,1]])
+    arr = []
+    for x in range(3):
+        for y in range(3):
+            for rep in range(reps[y,x]):
+                arr.append(mask[y,x])
+
+    return np.median(arr)

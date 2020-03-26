@@ -250,6 +250,8 @@ class Functions():
     def high_pass_mask(self):
         self.mask(highPassFilter)
 
+    def median_mask(self):
+        self.mask(np.median)
 
     # maskFunc is the function that calculates
     # the value of the pixel based on the neighbor
@@ -339,3 +341,4 @@ def highPassFilter(mask):
     weights /= dim**2;
 
     return np.sum(mask*weights)
+

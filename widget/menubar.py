@@ -47,6 +47,7 @@ class MenuBar(tk.Menu):
         func_menu_filter.add_command(label='Filtro de la media', command=parent.funcs.mean_mask)     
         func_menu_filter.add_command(label='Filtro Gaussiano', command=parent.funcs.gaussian_mask)     
         func_menu_filter.add_command(label='Filtro Pasaaltos', command=parent.funcs.high_pass_mask)     
+        func_menu_filter.add_command(label='Filtro de la mediana', command=parent.funcs.median_mask)     
 
         ## Info menu
         info_menu = tk.Menu(self, tearoff=0)

@@ -51,3 +51,23 @@ class Tools():
         img = img.crop((x1,y1,x2,y2))
 
         self.app_ref.set_processed(img)
+    
+    def dinamic_range_compression(self):
+        img = self.app_ref.img_proc
+
+        bands = img.getbands()
+        if bands == ('1',):
+            img = img.convert('L')
+        
+        min_val, max_val = img.getextrema()
+        c_val = (255 - 1)/np.log(1+max_val)
+
+        I = np.array(img)    
+        
+        for pixel in np.nditer(I, op_flags=['readwrite']):
+            pixel[...] = c_val*np.log(1+pixel) 
+
+        img = Image.fromarray(I)
+        if bands == ('1',):
+            img = img.convert('1')
+        self.app_ref.set_processed(img)

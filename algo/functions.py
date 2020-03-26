@@ -247,6 +247,9 @@ class Functions():
         gaussFilterWithSigma = lambda mask: gaussianFilter(mask, stdv)
         self.mask(gaussFilterWithSigma)
 
+    def high_pass_mask(self):
+        self.mask(highPassFilter)
+
 
     # maskFunc is the function that calculates
     # the value of the pixel based on the neighbor
@@ -327,3 +330,12 @@ def gaussianFilter(mask, stdv):
     
     return np.sum(mask*weights)
 
+def highPassFilter(mask):
+    dim = mask.shape[0]
+
+    weights = np.ones(mask.shape) * -1;
+    center = int(np.floor(dim/2))
+    weights[center, center] = dim**2 - 1;
+    weights /= dim**2;
+
+    return np.sum(mask*weights)

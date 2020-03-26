@@ -3,6 +3,7 @@ import numpy as np
 from PIL import Image
 
 from tkinter.simpledialog import askfloat, askinteger
+from tkinter import messagebox
 
 from algo.utils import calculate_histogram
 
@@ -131,6 +132,25 @@ class Functions():
 
         # Set equalized image
         img = Image.fromarray(I)
+        self.app_ref.set_processed(img)
+
+    def thresholding(self):
+        img = self.app_ref.img_proc
+
+        if img.getbands() != ('L',):
+            messagebox.showinfo(
+                    message="Solo se puede aplicar a imagenes de escala de grises",
+                    title="Umbralizar")
+            return
+
+        thd = askinteger("Umbralizar", "Umbral: ", initialvalue = 127)
+
+        I = np.array(img)
+
+        for pixel in np.nditer(I, op_flags=['readwrite']):
+            pixel[...] = 0 if pixel < thd else 255
+
+        img = Image.fromarray(I).convert('1')
         self.app_ref.set_processed(img)
 
     def gen_gauss(self, mu, desvio):

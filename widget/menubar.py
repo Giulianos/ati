@@ -29,6 +29,7 @@ class MenuBar(tk.Menu):
         func_menu.add_command(label='Restar otra imagen', command=parent.funcs.substract_other_image)
         func_menu.add_command(label='Multiplicar por otra imagen', command=parent.funcs.multiply_by_other_image)
         func_menu.add_command(label='Ecualizar histograma', command=parent.funcs.equalize_histogram)
+        func_menu.add_command(label='Umbralizar', command=parent.funcs.thresholding)
 
         func_menu.add_command(label='Pintar seleccion', command=parent.tools.paint_selection)
         func_menu.add_command(label='Cortar imagen', command=parent.tools.cut)

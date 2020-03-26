@@ -259,8 +259,8 @@ class Functions():
         I_ref = np.array(img)
 
         width, height = img.size
-        for x in range(width-1):
-            for y in range(height-1):
+        for x in range(width):
+            for y in range(height):
                 for i in range(mask_dim):
                     for j in range(mask_dim):
                         coordx = x+i-np.floor(mask_dim/2)

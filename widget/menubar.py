@@ -44,7 +44,8 @@ class MenuBar(tk.Menu):
         ## Filter menu
         func_menu_filter = tk.Menu(self, tearoff=0)   
         func_menu.add_cascade(label='Agregar Filtro', menu=func_menu_filter)
-        func_menu_filter.add_command(label='Filtro de la media', command=parent.funcs.mask)     
+        func_menu_filter.add_command(label='Filtro de la media', command=parent.funcs.mean_mask)     
+        func_menu_filter.add_command(label='Filtro Gaussiano', command=parent.funcs.gaussian_mask)     
 
         ## Info menu
         info_menu = tk.Menu(self, tearoff=0)

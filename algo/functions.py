@@ -239,7 +239,20 @@ class Functions():
             img = img.convert('1')
         self.app_ref.set_processed(img)
 
-    def mask(self):
+    def mean_mask(self):
+        self.mask(meanFilter)
+
+    def gaussian_mask(self):
+        stdv = askinteger("Filtro Gaussiano", "Valor del desvio estandar (σ): ", initialvalue = 1)
+        gaussFilterWithSigma = lambda mask: gaussianFilter(mask, stdv)
+        self.mask(gaussFilterWithSigma)
+
+
+    # maskFunc is the function that calculates
+    # the value of the pixel based on the neighbor
+    # pixels on the mask
+    def mask(self, maskFunc):
+
         mask_dim = askinteger("Filtro de mascara", "Tamaño de la mascara (nxn): ", initialvalue = 3)
 
         #dependiendo del tipo de filtro hago un array con el peso correspondiente
@@ -278,7 +291,7 @@ class Functions():
                 
                 #termine de armar la mascara, cambio el valor del pixel
                 # llamo a la funcion que corresponda dependiendo del filtro
-                I[y,x] = meanFilter(mask)
+                I[y,x] = maskFunc(mask)
 
         img = Image.fromarray(I)
         if bands == ('1',):
@@ -295,3 +308,22 @@ def meanFilter(mask):
     weight = 1/dim**2
 
     return np.sum(mask*weight)
+
+# stdv is sigma (not squared)
+def gaussianFilter(mask, stdv):
+    dim = mask.shape[0]
+
+    # weights depend on position
+    weights = np.ones(mask.shape)
+    for x in range(dim):
+        for y in range(dim):
+            # remember (0,0) is the center
+            relX = x-np.floor(dim/2)
+            relY = y-np.floor(dim/2)
+
+            weights[y,x] = (1/(2*np.pi*stdv**2))*np.exp(-(relX**2 + relY**2)/(stdv**2))
+    
+    weights = weights/np.sum(weights)
+    
+    return np.sum(mask*weights)
+

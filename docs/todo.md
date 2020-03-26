@@ -18,11 +18,11 @@
 	- [x] Rayleigh multiplicativo
 	- [x] Exponencial multiplicativo
 - [x] Implementar generador de ruido Sal y Pimienta de densidad variable
-- [ ] Implementar "ventana deslizante" que se aplique sobre una imagen con mascara de tamaño variable, cuadrada:
+- [x] Implementar "ventana deslizante" que se aplique sobre una imagen con mascara de tamaño variable, cuadrada:
 	- [x] Filtro de la media
-	- [ ] Filtro de la mediana
-	- [ ] Filtro de la mediana ponderada, solo 3x3
-	- [ ] Filtro de Gauss con σ y μ variables
-	- [ ] Realce de bordes
+	- [x] Filtro de la mediana
+	- [x] Filtro de la mediana ponderada, solo 3x3
+	- [x] Filtro de Gauss con σ y μ variables
+	- [x] Realce de bordes
 	
 

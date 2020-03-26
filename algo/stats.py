@@ -103,7 +103,7 @@ class Stats():
 
         # Create canvas in plot window
         canvas = FigureCanvasTkAgg(fig, master=plot_window)
-        canvas.show()
+        # canvas.show()
         canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1.0)
         canvas.draw()
 

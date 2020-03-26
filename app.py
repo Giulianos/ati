@@ -67,7 +67,7 @@ class App(tk.Tk):
         image_path = askopenfilename(filetypes=[('PPM', '.ppm'), ('PGM', '.pgm'), ('RAW', '.raw')])
 
         # Open the image from the file
-        if ".RAW" in image_path:
+        if ".RAW" in image_path or ".raw" in image_path:
             w = askinteger("Raw Image", "Width: ",
                   minvalue=2,
                   maxvalue=1000)

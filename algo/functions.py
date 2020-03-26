@@ -243,12 +243,9 @@ class Functions():
         mask_dim = askinteger("Filtro de mascara", "Tamaño de la mascara (nxn): ", initialvalue = 3)
 
         #dependiendo del tipo de filtro hago un array con el peso correspondiente
-        mask = np.ones((mask_dim, mask_dim))
-        #pesos para el mean filter (dependiendo cual pidan, le cambiamos los pesos)
-        for val in mask:
-            val = 1
-        #ponderacion total
-        total_weight = np.sum(mask)
+        # lo vamos armando a medida que pasamos por los pixeles (algunos filtros
+        # requieren saber el valor de los pixeles para armar la mascara)
+        mask = np.zeros((mask_dim, mask_dim))
 
         #iter over image
         img = self.app_ref.img_proc
@@ -264,25 +261,37 @@ class Functions():
         width, height = img.size
         for x in range(width-1):
             for y in range(height-1):
-                mask_aux = np.zeros((mask_dim, mask_dim))
                 for i in range(mask_dim):
                     for j in range(mask_dim):
                         coordx = x+i-np.floor(mask_dim/2)
                         coordy = y+j-np.floor(mask_dim/2)
                         if coordx < 0 or coordy < 0 or coordx >= width or coordy >= height:
                             #me fui entonces tengo que tomar una decision de las 4 propuestas
-                            mask_aux[i,j] = 0 
+                            mask[i,j] = 0 # relleno con negro
                         else:
-                            #estoy dentro de la ponderacion
-                            #print("coordx="+str(coordx))
-                            #print("coordy="+str(coordy))
-                            mask_aux[i, j] = I_ref[int(coordy), int(coordx)] * mask[i,j] * (1/total_weight)
+                            # estoy dentro de la imagen
+                            # armo la mascara con los valores de los pixeles
+                            # (despues llamo a la funcion para que me calcule el
+                            # valor del pixel en base a sus vecinos)
+                            mask[i, j] = I_ref[int(coordy), int(coordx)]
+
                 
                 #termine de armar la mascara, cambio el valor del pixel
-                I[y,x] = np.sum(mask_aux)
+                # llamo a la funcion que corresponda dependiendo del filtro
+                I[y,x] = meanFilter(mask)
 
         img = Image.fromarray(I)
         if bands == ('1',):
             img = img.convert('1')
         self.app_ref.set_processed(img)
         print("Mask Applied!")
+
+# mask is the NxN submatrix
+# of the image centered on the
+# pixel
+def meanFilter(mask):
+    dim = mask.shape[0]
+    # pixel weight is the same for all (1/N)
+    weight = 1/dim**2
+
+    return np.sum(mask*weight)

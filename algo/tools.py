@@ -1,5 +1,7 @@
 import numpy as np
 
+from tkinter.simpledialog import askfloat
+
 from PIL import Image
 
 class Tools():
@@ -71,3 +73,27 @@ class Tools():
         if bands == ('1',):
             img = img.convert('1')
         self.app_ref.set_processed(img)
+
+    def gamma_power(self):
+        img = self.app_ref.img_proc
+
+        #permite elegir 0 y 2, aunque el metodo no lo permita
+        gamma = askfloat("Modificar Contraste", "Variable γ:",
+                    initialvalue=1,  minvalue=0.0, maxvalue=2.0)
+
+        c_val = np.power((255-1),(1-gamma))
+
+        bands = img.getbands()
+        if bands == ('1',):
+            img = img.convert('L')
+        
+        I = np.array(img)    
+        
+        for pixel in np.nditer(I, op_flags=['readwrite']):
+            pixel[...] = c_val*np.power(pixel,gamma)
+
+        img = Image.fromarray(I)
+        if bands == ('1',):
+            img = img.convert('1')
+        self.app_ref.set_processed(img)
+

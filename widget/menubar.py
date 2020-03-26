@@ -34,6 +34,7 @@ class MenuBar(tk.Menu):
         func_menu.add_command(label='Pintar seleccion', command=parent.tools.paint_selection)
         func_menu.add_command(label='Cortar imagen', command=parent.tools.cut)
         func_menu.add_command(label='Ajustar rango de imagen', command=parent.tools.dinamic_range_compression)
+        func_menu.add_command(label='Ajustar contraste de imagen', command=parent.tools.gamma_power)
 
         ## Noise cascade in functions menu
         func_menu_ruido = tk.Menu(self, tearoff=0)

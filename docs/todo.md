@@ -1,9 +1,9 @@
 # TP 1
-- [ ] Implementar las siguientes funciones:
+- [x] Implementar las siguientes funciones:
 	- [x] Suma, resta y producto de imágenes
 	- [x] Producto de una imagen por un escalar (Creo que esta bien hecho)
-	- [ ] Compresión del rango dinámico
-	- [ ] Función de potencia γ
+	- [x] Compresión del rango dinámico
+	- [x] Función de potencia γ
 - [x] Implementar una función que devuelva el negativo de una imágen
 - [x] Implementar una función que devuelva el histograma de niveles de grises de una imagen
 - [x] Implementar una función que aplique un umbral a una imágen, devolviendo una imagen binaria. El umbral debe ser un parametro de la interface.

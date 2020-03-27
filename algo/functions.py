@@ -156,7 +156,7 @@ class Functions():
     def gen_gauss(self, mu, desvio):
         return np.random.normal(mu, desvio)
 
-    def gen_raleigh(self, xhi):
+    def gen_rayleigh(self, xhi):
         return np.random.rayleigh(xhi)
 
     def gen_exp(self, lamb):
@@ -195,26 +195,26 @@ class Functions():
 
     def noise_additive_gauss(self):
         percentage = askinteger("Ruido gaussiano aditivo", "Porcentaje a contaminar: ",
-                    initialvalue=30)
+                    initialvalue=10)
         mu = askfloat("Distribucion Gaussiana", "Variable μ: ",
-                  initialvalue=1)
+                  initialvalue=0)
         desvio = askfloat("Distribucion Gaussiana", "Variable σ: ",
-                  initialvalue=1)
+                  initialvalue=2)
 
         self.apply_noise(percentage, "gauss", "add", mu, desvio)
         
         print("Additive Gauss applied!")
         return 0
     
-    def noise_multiplicative_raleigh(self):
-        percentage = askinteger("Ruido raleigh multiplicativo", "Porcentaje a contaminar: ",
-                    initialvalue=30)
-        xhi = askfloat("Distribucion Raleigh", "Variable ξ: ",
+    def noise_multiplicative_rayleigh(self):
+        percentage = askinteger("Ruido rayleigh multiplicativo", "Porcentaje a contaminar: ",
+                    initialvalue=10)
+        xhi = askfloat("Distribucion Rayleigh", "Variable ξ: ",
                   initialvalue=1)
         
-        self.apply_noise(percentage, "raleigh", "mul", xhi, None)
+        self.apply_noise(percentage, "rayleigh", "mul", xhi, None)
 
-        print("Multiplicative Raleigh applied!")
+        print("Multiplicative Rayleigh applied!")
         return 0
     
     def noise_multiplicative_exp(self):
@@ -242,8 +242,8 @@ class Functions():
             if noised <= percentage:
                 if op_operation == "exp":
                     random_number = self.gen_exp(var1)
-                elif op_operation == "raleigh":
-                    random_number = self.gen_raleigh(var1)
+                elif op_operation == "rayleigh":
+                    random_number = self.gen_rayleigh(var1)
                 elif op_operation == "gauss":
                     random_number = self.gen_gauss(var1, var2)
                 

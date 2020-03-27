@@ -40,7 +40,7 @@ class MenuBar(tk.Menu):
         func_menu_ruido = tk.Menu(self, tearoff=0)
         func_menu.add_cascade(label='Agregar Ruido', menu=func_menu_ruido)
         func_menu_ruido.add_command(label='Gaussiano Aditivo', command=parent.funcs.noise_additive_gauss)
-        func_menu_ruido.add_command(label='Raleigh Multiplicativo', command=parent.funcs.noise_multiplicative_raleigh)
+        func_menu_ruido.add_command(label='Rayleigh Multiplicativo', command=parent.funcs.noise_multiplicative_rayleigh)
         func_menu_ruido.add_command(label='Exponencial Multiplicativo', command=parent.funcs.noise_multiplicative_exp)
         func_menu_ruido.add_command(label='Sal y Pimienta', command=parent.funcs.noise_snp)
 

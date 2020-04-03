@@ -296,9 +296,9 @@ class Functions():
             img = img.convert('L')
 
         #imagen a procesar
-        I = np.array(img)
+        I = np.array(img, dtype=np.int32)
         #imagen que no cambia
-        I_ref = np.array(img)
+        I_ref = np.array(img, dtype=np.int32)
 
         width, height = img.size
         for x in range(width):
@@ -322,7 +322,8 @@ class Functions():
                 # llamo a la funcion que corresponda dependiendo del filtro
                 I[y,x] = maskFunc(mask)
 
-        img = Image.fromarray(I)
+        # img = Image.fromarray(I)
+        img = Image.fromarray(self.remap_image_array(I))
         if bands == ('1',):
             img = img.convert('1')
         self.app_ref.set_processed(img)

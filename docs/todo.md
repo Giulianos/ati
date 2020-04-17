@@ -24,5 +24,27 @@
 	- [x] Filtro de la mediana ponderada, solo 3x3
 	- [x] Filtro de Gauss con σ y μ variables
 	- [x] Realce de bordes
-	
 
+# TP2 !TENGO ANOTADO QUE HAY QUE ELEGIR IMPLEMENTAR 1 SOLO ENTRE PREWITT Y SOBEL
+- [ ] Implementar el detector de bordes por gradiente utilizando los operadores:
+	- [ ] Primero hacerlos por separado (vertical y horizontal) y luego sintetizados
+	- [ ] Prewitt
+	- [ ] Sobel
+- [ ] Aplicar detectores de borde sobre imagenes con ruido:
+	- [ ] Aplicar Prewitt
+	- [ ] Aplicar Sobel
+- [ ] Aplicar detectores a imagenes con color:
+	- [ ] Aplicar Prewitt
+	- [ ] Aplicar Sobel
+- [ ] Implementar operadores direccionales derivados de mascaras en todas las direcciones:
+	- [ ] Hacer solamente el A (punto 5)
+- [ ] Implementar los detectores de bordes:
+	- [ ] Laplaciano
+		- [ ] Aplicar a 2 imagenes
+		- [ ] Aplicar a 2 imagenes con ruido
+	- [ ] Laplaciano mas evaluacion de pendiente
+		- [ ] Aplicar a 2 imagenes
+		- [ ] Aplicar a 2 imagenes con ruido
+	- [ ] Laplaciano del gaussiano (Marr-Hildreth)
+		- [ ] Aplicar a 2 imagenes
+		- [ ] Aplicar a 2 imagenes con ruido

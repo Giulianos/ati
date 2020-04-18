@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 from tkinter.simpledialog import askinteger
+
+import numpy as np
 from PIL import Image
 
 from widget.imageviewer import ImageViewer
@@ -11,6 +13,8 @@ from algo.gen import Gen
 from algo.stats import Stats
 from algo.tools import Tools
 from algo.functions import Functions
+
+import algo.utils as utils
 
 from mouse import MouseSelection
 
@@ -61,9 +65,10 @@ class App(tk.Tk):
         self.statusbar = StatusBar(self)
         self.statusbar.grid(row=2, column=0, columnspan=2, sticky=tk.E+tk.W)
 
+    # This loads an image from a file and returns
+    # it as a NumPy array
     def load_image_from_file(self):
         # Get the image path from the dialog
-        # TODO: add RAW filetype (requires special opening)
         image_path = askopenfilename(filetypes=[('PPM', '.ppm'), ('PGM', '.pgm'), ('RAW', '.raw')])
 
         # Open the image from the file
@@ -80,12 +85,16 @@ class App(tk.Tk):
         else: 
             img = Image.open(image_path)
 
-        return img
+        return np.array(img)
 
+    # This function is called
+    # when the load button is pressed
     def on_load_image(self):
         # Load into app
         self.set_original(self.load_image_from_file())
 
+    # This functions is called
+    # when the save button is pressed
     def on_save_image(self):
         # Get the path were the image will be saved
         image_path = asksaveasfilename(filetypes=[
@@ -98,18 +107,36 @@ class App(tk.Tk):
         self.img_proc.save(image_path)
 
     # Sets the original image (setting also the processed)
+    # this receives a NumPy array image
     def set_original(self, img):
         self.img_orig = img
-        self.img_proc = img.copy()
 
-        # Set the images in the ImageViewer
-        self.iv_orig.set_image(self.img_orig)
-        self.iv_proc.set_image(self.img_proc)
+        # First rescale image values to 0-255
+        scaled_orig = utils.remap_image(self.img_orig)
+
+        # Set the image in the ImageViewer
+        self.iv_orig.set_image(Image.fromarray(np.uint8(scaled_orig)))
+
+        # When loading a new image, load it also in the processed view
+        self.set_processed(img.copy())
 
     # Sets the processed image (use this to apply any modification to the image)
     def set_processed(self, img):
         self.img_proc = img
-        self.iv_proc.set_image(self.img_proc)
+
+        # First rescale image values to 0-255
+        scaled_proc = utils.remap_image(self.img_proc)
+
+        # Set the image in the ImageViewer
+        self.iv_proc.set_image(Image.fromarray(np.uint8(scaled_proc)))
+
+    # Returns the image in 64bit signed array format
+    # this allows handling of negative numbers
+    def get_processed(self):
+        return np.int64(self.img_proc.copy())
+
+    def get_original(self):
+        return np.int64(self.img_proc.copy())
 
     # Mouse handler for processed image
     def on_proc_mouse_move(self, canvas, x, y):
@@ -128,4 +155,3 @@ class App(tk.Tk):
     def on_proc_mouse_leave(self, event):
         self.statusbar.hide_coords()
         self.statusbar.hide_color()
-

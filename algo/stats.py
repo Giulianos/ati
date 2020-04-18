@@ -14,7 +14,7 @@ class Stats():
         self.app_ref = app_ref
 
     def proc_pixel_value(self, x, y):
-        I = np.array(self.app_ref.img_proc)
+        I = self.app_ref.get_processed()
         color = I[y][x]
 
         if type(color) == np.bool_:

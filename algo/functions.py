@@ -5,30 +5,29 @@ from PIL import Image
 from tkinter.simpledialog import askfloat, askinteger
 from tkinter import messagebox
 
-from algo.utils import calculate_histogram
+import algo.utils as utils
 
 class Functions():
     def __init__(self, app_ref):
         self.app_ref = app_ref
+    
+    def negative_gray(self, I):
+        for pixel in np.nditer(I, op_flags=['readwrite']):
+            pixel[...] = np.subtract(255, pixel)
+        
+        return I
 
     def negative(self):
-        img = self.app_ref.img_proc
-        bands = img.getbands()
-        if bands == ('1',):
-            img = img.convert('L')
+        I = self.app_ref.get_processed()
 
-        I = np.array(img)
+        fmt = utils.img_type(I)
 
-        for pixel in np.nditer(I, op_flags=['readwrite']):
-            if bands == ('1',):
-                pixel[...] = 0 if pixel else 255
-            else:
-                pixel[...] = np.subtract(255, pixel)
+        if fmt == 'RGB':
+            I = utils.apply_gray_to_rgb(I, self.negative_gray)
+        else:
+            I = self.negative_gray(I)
 
-        img = Image.fromarray(I)
-        if bands == ('1',):
-            img = img.convert('1')
-        self.app_ref.set_processed(img)
+        self.app_ref.set_processed(I)
     
     def multiply_by_scalar(self):
         scalar = askfloat("Multiplicación por escalar", "Escalar: ",
@@ -36,21 +35,12 @@ class Functions():
                   minvalue=0,
                   maxvalue=255)
 
-        img = self.app_ref.img_proc
-        bands = img.getbands()
-        if bands == ('1',):
-            img = img.convert('L')
-
-        I = np.array(img)
+        I = self.app_ref.get_processed()
 
         for pixel in np.nditer(I, op_flags=['readwrite']):
-            if bands == ('1',):
-                pixel[...] = np.multiply(scalar, pixel)
+            pixel[...] = np.multiply(scalar, pixel)
 
-        img = Image.fromarray(I)
-        if bands == ('1',):
-            img = img.convert('1')
-        self.app_ref.set_processed(img)
+        self.app_ref.set_processed(I)
 
     def sum_other_image(self):
         self.apply_binary_op(lambda p1,p2: p1+p2)
@@ -62,51 +52,21 @@ class Functions():
         self.apply_binary_op(lambda p1,p2: p1*p2)
 
     def apply_binary_op(self, op):
+        I1 = self.app_ref.get_processed()
         # load other image
-        img_other = self.app_ref.load_image_from_file()
-
-        if img_other.getbands() == ('R','G','B') or self.app_ref.img_proc.getbands() == ('R','G', 'B'):
-            # TODO: Not implemented for RGB
-            return
-
-        # TODO: Handle different size images
-
-        # Convert images to arrays
-        I1 = np.array(self.app_ref.img_proc.convert('L'), dtype=float)
-        I2 = np.array(img_other.convert('L'), dtype=float)
+        I2 = self.app_ref.load_image_from_file()
 
         # Perform function pixel by pixel
         for pix1, pix2 in np.nditer([I1, I2], op_flags=['readwrite']):
             pix1[...] = op(pix1, pix2)
 
-
-        # Remap image to 0-255
-        img = Image.fromarray(self.remap_image_array(I1))
-
-        self.app_ref.set_processed(img)
-
-
-    # This function maps arbitrary
-    # pixel values to 0-max_value
-    def remap_image_array(self, I, max_value=255):
-        # Handle images with range 0
-        if np.ptp(I) == 0:
-            if np.min(I) < 0:
-                return I-np.min(I)
-            elif np.max(I) > max_value:
-                return I-(np.max(I)-max_value)
-            else:
-                return I
-
-        return (I-np.min(I))/np.ptp(I)*max_value
-
+        self.app_ref.set_processed(I1)
 
     def equalize_histogram(self):
-        # Image to array
-        I = np.array(self.app_ref.img_proc.convert('L'))
+        I = self.app_ref.get_processed()
 
         # Calculate histogram for image
-        hist = calculate_histogram(I, False)
+        hist = utils.calculate_histogram(I, False)
 
         # Define cdf
         cdf = lambda k: hist[:k+1].sum()
@@ -126,32 +86,22 @@ class Functions():
         t = np.zeros(256)
         for j in range(256):
             t[j] = int((cdf(j)-cdfmin)/(N-cdfmin)*255)
+
         # Apply transformation
         for pixel in np.nditer(I, op_flags=['readwrite']):
             pixel[...] = t[pixel]
 
-        # Set equalized image
-        img = Image.fromarray(I)
-        self.app_ref.set_processed(img)
+        self.app_ref.set_processed(I)
 
     def thresholding(self):
-        img = self.app_ref.img_proc
-
-        if img.getbands() != ('L',):
-            messagebox.showinfo(
-                    message="Solo se puede aplicar a imagenes de escala de grises",
-                    title="Umbralizar")
-            return
-
         thd = askinteger("Umbralizar", "Umbral: ", initialvalue = 127)
 
-        I = np.array(img)
+        I = self.app_ref.get_processed()
 
         for pixel in np.nditer(I, op_flags=['readwrite']):
             pixel[...] = 0 if pixel < thd else 255
 
-        img = Image.fromarray(I).convert('1')
-        self.app_ref.set_processed(img)
+        self.app_ref.set_processed(I)
 
     def gen_gauss(self, mu, desvio):
         return np.random.normal(mu, desvio)
@@ -172,12 +122,7 @@ class Functions():
                     initialvalue=10)
         
         #iter over image
-        img = self.app_ref.img_proc
-        bands = img.getbands()
-        if bands == ('1',):
-            img = img.convert('L')
-
-        I = np.array(img)
+        I = self.app_ref.get_processed()
 
         for pixel in np.nditer(I, op_flags=['readwrite']):
             noised = self.gen_uniform(0,100)
@@ -188,10 +133,7 @@ class Functions():
             
             #ToDo for RGB
 
-        img = Image.fromarray(I)
-        if bands == ('1',):
-            img = img.convert('1')
-        self.app_ref.set_processed(img)
+        self.app_ref.set_processed(I)
 
     def noise_additive_gauss(self):
         percentage = askinteger("Ruido gaussiano aditivo", "Porcentaje a contaminar: ",
@@ -230,12 +172,7 @@ class Functions():
 
     def apply_noise(self, percentage, op_operation, op_type, var1, var2):
         #iter over image
-        img = self.app_ref.img_proc
-        bands = img.getbands()
-        if bands == ('1',):
-            img = img.convert('L')
-
-        I = np.array(img)
+        I = self.app_ref.get_processed()
 
         for pixel in np.nditer(I, op_flags=['readwrite']):
             noised = self.gen_uniform(0,100)
@@ -253,11 +190,7 @@ class Functions():
                     pixel[...] = pixel+random_number
             
             #ToDo for RGB
-
-        img = Image.fromarray(I)
-        if bands == ('1',):
-            img = img.convert('1')
-        self.app_ref.set_processed(img)
+        self.app_ref.set_processed(I)
 
     def mean_mask(self):
         self.mask(meanFilter)
@@ -289,18 +222,12 @@ class Functions():
         # requieren saber el valor de los pixeles para armar la mascara)
         mask = np.zeros((mask_dim, mask_dim))
 
-        #iter over image
-        img = self.app_ref.img_proc
-        bands = img.getbands()
-        if bands == ('1',):
-            img = img.convert('L')
-
         #imagen a procesar
-        I = np.array(img, dtype=np.int32)
+        I = self.app_ref.get_processed()
         #imagen que no cambia
-        I_ref = np.array(img, dtype=np.int32)
+        I_ref = np.copy(I)
 
-        width, height = img.size
+        height, width = np.shape(I)
         for x in range(width):
             for y in range(height):
                 for i in range(mask_dim):
@@ -322,11 +249,7 @@ class Functions():
                 # llamo a la funcion que corresponda dependiendo del filtro
                 I[y,x] = maskFunc(mask)
 
-        # img = Image.fromarray(I)
-        img = Image.fromarray(self.remap_image_array(I))
-        if bands == ('1',):
-            img = img.convert('1')
-        self.app_ref.set_processed(img)
+        self.app_ref.set_processed(I)
         print("Mask Applied!")
 
 # mask is the NxN submatrix

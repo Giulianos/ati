@@ -29,3 +29,55 @@ def remap_image(I, max_value=255):
 
     return (I-np.min(I))/np.ptp(I)*max_value
 
+def img_type(I):
+    # len 3: row, col & channel
+    if len(np.shape(I)) == 3:
+        return 'RGB'
+    
+    # len 2: row, col
+    if len(np.shape(I)) == 2:
+        if I.dtype == bool:
+            return 'BIN'
+        else:
+            return 'GRAY'
+    
+    # unknown type
+    return None
+
+def split_bands(I):
+    rows, cols, bands = np.shape(I)
+    R = np.zeros((rows, cols))
+    G = np.zeros((rows, cols))
+    B = np.zeros((rows, cols))
+
+    for row in range(rows):
+        for col in range(cols):
+            r, g, b = I[row][col]
+            R[row][col] = r
+            G[row][col] = g
+            B[row][col] = b
+    
+    return R, G, B
+
+def join_bands(R, G, B):
+    if np.shape(R) != np.shape(G) or np.shape(R) != np.shape(B):
+        return None
+    rows, cols = np.shape(R)
+    I = np.zeros((rows, cols, 3))
+    for row in range(rows):
+        for col in range(cols):
+            I[row][col][0] = R[row][col]
+            I[row][col][1] = G[row][col]
+            I[row][col][2] = B[row][col]
+    
+    return I
+
+def apply_gray_to_rgb(I, func):
+    R, G, B = split_bands(I)
+    I2 = join_bands(
+        func(R),
+        func(G),
+        func(B)
+    )
+
+    return I2

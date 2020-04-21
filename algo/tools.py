@@ -4,6 +4,8 @@ from tkinter.simpledialog import askfloat
 
 from PIL import Image
 
+import algo.utils as utils
+
 class Tools():
     def __init__(self, app_ref):
         self.app_ref = app_ref
@@ -21,79 +23,62 @@ class Tools():
 
     def paint_selection(self):
         self.app_ref.mouse_selection.request_selection(self.paint_selection_handler)
-
+    
+    
+        
     def paint_selection_handler(self, start, end):
-        img = self.app_ref.img_proc
-        I = np.array(img)
+        I = self.app_ref.get_processed()
         x_start, y_start = start
         x_end, y_end = end
-        for x in range(x_start, x_end+1):
-            for y in range(y_start, y_end+1):
-                if img.getbands() == ('1',): # image is binary
-                    I[y][x] = False
-                elif img.getbands() == ('L',): # image is grayscale
+        
+        def paint_grayscale(I):
+            for x in range(x_start, x_end+1):
+                for y in range(y_start, y_end+1):
                     I[y][x] = 0
-                elif img.getbands() == ('R','G','B'):
-                    I[y][x] = (0,0,0)
+            return I   
 
-        # Convert image back to PIL
-        img = Image.fromarray(I)
-        self.app_ref.set_processed(img)
+        if utils.img_type(I) == 'RGB':
+            utils.apply_gray_to_rgb(I, paint_grayscale)
+        else:
+            paint_grayscale(I)
+
+        self.app_ref.set_processed(I)
 
 
     def cut(self):
         self.app_ref.mouse_selection.request_selection(self.handle_cut)
 
     def handle_cut(self, start, end):
-        img = self.app_ref.img_proc
+        I = self.app_ref.get_processed()
         
         x1, y1 = start
         x2, y2 = end
 
-        img = img.crop((x1,y1,x2,y2))
-
-        self.app_ref.set_processed(img)
+        self.app_ref.set_processed(I[y1:y2, x1:x2])
     
     def dinamic_range_compression(self):
-        img = self.app_ref.img_proc
+        I = self.app_ref.get_processed()
 
-        bands = img.getbands()
-        if bands == ('1',):
-            img = img.convert('L')
-        
-        min_val, max_val = img.getextrema()
+        max_val = np.max(I)
+
         c_val = (255 - 1)/np.log(1+max_val)
 
-        I = np.array(img)    
-        
         for pixel in np.nditer(I, op_flags=['readwrite']):
             pixel[...] = c_val*np.log(1+pixel) 
 
-        img = Image.fromarray(I)
-        if bands == ('1',):
-            img = img.convert('1')
-        self.app_ref.set_processed(img)
+        self.app_ref.set_processed(I)
 
     def gamma_power(self):
-        img = self.app_ref.img_proc
-
         #permite elegir 0 y 2, aunque el metodo no lo permita
         gamma = askfloat("Modificar Contraste", "Variable γ:",
                     initialvalue=1,  minvalue=0.0, maxvalue=2.0)
 
         c_val = np.power((255-1),(1-gamma))
 
-        bands = img.getbands()
-        if bands == ('1',):
-            img = img.convert('L')
-        
-        I = np.array(img)    
-        
+        I = self.app_ref.get_processed()
+
         for pixel in np.nditer(I, op_flags=['readwrite']):
             pixel[...] = c_val*np.power(pixel,gamma)
 
-        img = Image.fromarray(I)
-        if bands == ('1',):
-            img = img.convert('1')
-        self.app_ref.set_processed(img)
+        self.app_ref.set_processed(I)
 

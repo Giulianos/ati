@@ -104,7 +104,8 @@ class App(tk.Tk):
         ])
 
         # Save using PIL (format is inferred from extension)
-        self.img_proc.save(image_path)
+        img = utils.remap_image(self.img_orig)
+        Image.fromarray(np.uint8(img)).save(image_path)
 
     # Sets the original image (setting also the processed)
     # this receives a NumPy array image

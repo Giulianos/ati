@@ -8,6 +8,8 @@ from PIL import Image
 import tkinter as tk
 
 from algo.utils import calculate_histogram
+from algo.utils import img_type
+
 
 class Stats():
     def __init__(self, app_ref):
@@ -26,16 +28,17 @@ class Stats():
         self.app_ref.mouse_selection.request_selection(self.handle_region_mean_value)
 
     def handle_region_mean_value(self, start, end):
-        img = self.app_ref.img_proc
-        bands = self.app_ref.img_proc.getbands()
-        I = np.array(img)
+        I = self.app_ref.get_processed()
+        fmt = img_type(I)
+
         x_start, y_start = start
         x_end, y_end = end
-        if bands == ('1',): # binary
+
+        if fmt == 'BIN': # binary
             avg = self.mean_binary(I, x_start, y_start, x_end, y_end)
-        elif bands == ('L',): # grayscale
+        elif fmt == 'GRAY': # grayscale
             avg = self.mean_grayscale(I, x_start, y_start, x_end, y_end)
-        elif bands == ('R','G','B'): # rgb
+        elif fmt == 'RGB': # rgb
             avg = self.mean_rgb(I, x_start, y_start, x_end, y_end)
 
         tk.messagebox.showinfo('Promedio', 'El promedio de los pixeles en la region seleccionada es {}'.format(avg))
@@ -81,10 +84,10 @@ class Stats():
     
     def show_histogram(self):
         # Create histograms
-        I_orig = np.array(self.app_ref.img_orig.convert('L'))
+        I_orig = self.app_ref.get_original()
         hist_orig = calculate_histogram(I_orig)
         
-        I_proc = np.array(self.app_ref.img_proc.convert('L'))
+        I_proc = self.app_ref.get_processed()
         hist_proc = calculate_histogram(I_proc)
 
         # Create plot window

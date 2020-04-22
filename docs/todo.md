@@ -26,10 +26,10 @@
 	- [x] Realce de bordes
 
 # TP2 !TENGO ANOTADO QUE HAY QUE ELEGIR IMPLEMENTAR 1 SOLO ENTRE PREWITT Y SOBEL
-- [ ] Implementar el detector de bordes por gradiente utilizando los operadores:
-	- [ ] Primero hacerlos por separado (vertical y horizontal) y luego sintetizados
-	- [ ] Prewitt
-	- [ ] Sobel
+- [X] Implementar el detector de bordes por gradiente utilizando los operadores:
+	- [X] Primero hacerlos por separado (vertical y horizontal) y luego sintetizados
+	- [X] Prewitt
+	- [ ] Sobel (No lo hacemos)
 - [ ] Aplicar detectores de borde sobre imagenes con ruido:
 	- [ ] Aplicar Prewitt
 	- [ ] Aplicar Sobel

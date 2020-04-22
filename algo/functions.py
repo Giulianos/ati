@@ -212,7 +212,7 @@ class Functions():
     # maskFunc is the function that calculates
     # the value of the pixel based on the neighbor
     # pixels on the mask
-    def mask(self, maskFunc, mask_dim=None):
+    def mask(self, maskFunc, mask_dim=None, applying=True):
         
         if mask_dim == None:
             mask_dim = askinteger("Filtro de mascara", "Tamaño de la mascara (nxn): ", initialvalue = 3)
@@ -249,8 +249,75 @@ class Functions():
                 # llamo a la funcion que corresponda dependiendo del filtro
                 I[y,x] = maskFunc(mask)
 
-        self.app_ref.set_processed(I)
+        if applying:
+            self.app_ref.set_processed(I)
+        else:
+            return I
         print("Mask Applied!")
+
+    def horizontal_border(self):
+        self.mask(horizontal_filter)
+
+    def vertical_border(self):
+        self.mask(vertical_filter)
+
+    def prewitt_border(self):
+        horzontal_pass = self.mask(horizontal_filter,applying=False)
+        vertical_pass = self.mask(vertical_filter, applying=False)
+
+        self.sintetize(horzontal_pass, vertical_pass)
+    
+    def sintetize(self, I1, I2, sintetizer_form='max'):
+        I = np.copy(I1)
+        height, width = np.shape(I1)
+        for x in range(width):
+            for y in range(height):
+                if sintetizer_form == 'max':
+                    I[y, x] = np.maximum(I1[y,x],I2[y,x])
+        	
+        self.app_ref.set_processed(I)
+
+
+
+#es el df/dy, supongo que es el vertical
+def vertical_filter(mask):
+    #creo que siempre son de 3x3, despues lo podemos cambiar para ser mas eficiente
+    dim = mask.shape[0]
+
+    weights = np.ones(mask.shape)
+    mid_row = np.floor(dim/2)
+    for y in range(dim):
+        if y < mid_row:
+            for x in range(dim):
+                weights[y,x] = -1
+        if y == mid_row:
+            for x in range(dim):
+                weights[y,x] = 0
+        if y > mid_row:
+            for x in range(dim):
+                weights[y,x] = 1
+    
+    return np.sum(mask*weights)
+
+#es el df/dx, supongo que es el horizontal
+def horizontal_filter(mask):
+    #creo que siempre son de 3x3, despues lo podemos cambiar para ser mas eficiente
+    dim = mask.shape[0]
+
+    weights = np.ones(mask.shape)
+    mid_col = np.floor(dim/2)
+    for x in range(dim):
+        if x < mid_col:
+            for y in range(dim):
+                weights[y,x] = -1
+        if x == mid_col:
+            for y in range(dim):
+                weights[y,x] = 0
+        if x > mid_col:
+            for y in range(dim):
+                weights[y,x] = 1
+    
+    return np.sum(mask*weights)
 
 # mask is the NxN submatrix
 # of the image centered on the
@@ -302,3 +369,4 @@ def weightedMedianFilter(mask):
                 arr.append(mask[y,x])
 
     return np.median(arr)
+

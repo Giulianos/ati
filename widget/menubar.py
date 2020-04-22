@@ -53,6 +53,17 @@ class MenuBar(tk.Menu):
         func_menu_filter.add_command(label='Filtro de la mediana', command=parent.funcs.median_mask)     
         func_menu_filter.add_command(label='Filtro de la mediana ponderada', command=parent.funcs.wmedian_mask)     
 
+        ## Border menu
+        border_menu = tk.Menu(self, tearoff=0)
+        self.add_cascade(label='Border', menu=border_menu)
+        border_menu.add_command(label='Borde Horizontal', command=parent.funcs.horizontal_border)
+        border_menu.add_command(label='Borde Vertical', command=parent.funcs.vertical_border)
+
+        ## Border detection menu
+        border_menu_detection = tk.Menu(self, tearoff=0)  
+        border_menu.add_cascade(label='Metodo de Deteccion', menu=border_menu_detection)
+        border_menu_detection.add_command(label='Prewitt', command=parent.funcs.prewitt_border)
+
         ## Info menu
         info_menu = tk.Menu(self, tearoff=0)
         self.add_cascade(label='Info', menu=info_menu)

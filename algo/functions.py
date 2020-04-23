@@ -311,6 +311,9 @@ class Functions():
         for i in range(2):
             images.append(self.mask(filters[i], applying=False))
 
+        print(images[0])
+        print(images[1])
+
         self.sintetize(images, sintetizer_form=('or' if answer else 'and'))
 
     # Sintetizes one channel
@@ -449,11 +452,12 @@ def laplace_filter(mask):
     #creo que siempre son de 3x3, despues lo podemos cambiar para ser mas eficiente
     dim = mask.shape[0]
 
-    weights = np.ones(mask.shape)
+    weights = np.zeros(mask.shape)
     mid = np.floor(dim/2)
     for y in range(dim):
         for x in range(dim):
-            if (y != mid) and x == mid:
+            if y != mid:
+                if x == mid:
                     weights[y,x] = -1
             else:
                 if x == mid:

@@ -69,6 +69,7 @@ class MenuBar(tk.Menu):
         border_menu_detection.add_command(label='Alternative', command=parent.funcs.alternative_border)
         border_menu_detection.add_command(label='Laplace', command=parent.funcs.laplace_border)
         border_menu_detection.add_command(label='Laplace Complete', command=parent.funcs.laplace_complete_border)
+        border_menu_detection.add_command(label='Laplace Gauss', command=parent.funcs.laplace_gauss_border)
     
         # Difussion menu
         func_difussion_menu = tk.Menu(self, tearoff=0)

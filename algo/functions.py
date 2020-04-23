@@ -306,15 +306,32 @@ class Functions():
         #aplico laplace
         self.mask(laplace_filter)
 
+        # no usa umbral
         filters = [horizontal_zero_check, vertical_zero_check]
         images = []
         for i in range(2):
             images.append(self.mask(filters[i], applying=False))
 
-        print(images[0])
-        print(images[1])
 
         self.sintetize(images, sintetizer_form=('or' if answer else 'and'))
+
+    def laplace_gauss_border(self):
+        #Preguntar si quiero max (OR) bordes o min (AND) bordes
+        answer = messagebox.askyesno("Pregunta","Quiere maximizar los bordes encontrados?")
+        input_sigma = askinteger("Filtro Gaussiano", "Valor del desvio estandar (σ): ", initialvalue = 1)
+        input_umbral = askinteger("Cruce por 0", "Valor del umbral (u): ", initialvalue = 10)
+        #aplico gauss
+        self.mask(partial(gaussianFilter,stdv=input_sigma))
+        #aplico laplace
+        self.mask(laplace_filter)
+
+        filters = [partial(horizontal_zero_check,u=input_umbral), partial(vertical_zero_check, u=input_umbral)]
+        images = []
+        for i in range(2):
+            images.append(self.mask(filters[i], applying=False))
+
+        self.sintetize(images, sintetizer_form=('or' if answer else 'and'))
+
 
     # Sintetizes one channel
     def sintetize_gray(self, images, sintetizer_form='norm'):
@@ -467,33 +484,45 @@ def laplace_filter(mask):
     
     return np.sum(mask*weights)
 
-def vertical_zero_check(mask):
+def vertical_zero_check(mask, u=0):
     #creo que siempre son de 3x3, despues lo podemos cambiar para ser mas eficiente
     dim = mask.shape[0]
     mid = int(np.floor(dim/2))
     
-    ret = mask[mid,mid] * mask[mid+1, mid]
-    if ret < 0:
-        return 255
+    #ToDo: Hay que agregar el umbral para la pendiente |a|+|b| > U
+    mid_pix = mask[mid,mid]
+    next_pix = mask[mid+1, mid]
+    if mid_pix * next_pix < 0:
+        return 255 if abs(mid_pix) + abs(next_pix) > u else 0
     # aca me fijo si estoy en un caso de pixel 0, por lo que evaluo atras y adelante
     # (Habria que verificar que no nos comemos ningun caso especial)
     elif mask[mid,mid] == 0:
-        return 255 if (mask[mid-1, mid] * mask[mid+1, mid]) < 0 else 0
+        prev_pix = mask[mid-1, mid]
+        if prev_pix * next_pix < 0:
+            return 255 if abs(prev_pix) + abs(next_pix) > u else 0
+        else:
+            return 0
     else:
         return 0
 
-def horizontal_zero_check(mask):
+def horizontal_zero_check(mask, u=0):
     #creo que siempre son de 3x3, despues lo podemos cambiar para ser mas eficiente
     dim = mask.shape[0]
     mid = int(np.floor(dim/2))
     
-    ret = mask[mid,mid] * mask[mid, mid+1]
-    if ret < 0:
-        return 255
+    #ToDo: Hay que agregar el umbral para la pendiente |a|+|b| > U
+    mid_pix = mask[mid,mid]
+    next_pix = mask[mid, mid+1]
+    if mid_pix * next_pix < 0:
+        return 255 if abs(mid_pix) + abs(next_pix) > u else 0
     # aca me fijo si estoy en un caso de pixel 0, por lo que evaluo atras y adelante
     # (Habria que verificar que no nos comemos ningun caso especial)
     elif mask[mid,mid] == 0:
-        return 255 if (mask[mid, mid-1] * mask[mid, mid+1]) < 0 else 0
+        prev_pix = mask[mid, mid-1]
+        if prev_pix * next_pix < 0:
+            return 255 if abs(prev_pix) + abs(next_pix) > u else 0
+        else:
+            return 0
     else:
         return 0
 

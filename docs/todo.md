@@ -30,12 +30,10 @@
 	- [X] Primero hacerlos por separado (vertical y horizontal) y luego sintetizados
 	- [X] Prewitt
 	- [ ] Sobel (No lo hacemos)
-- [ ] Aplicar detectores de borde sobre imagenes con ruido:
-	- [ ] Aplicar Prewitt
-	- [ ] Aplicar Sobel
-- [ ] Aplicar detectores a imagenes con color:
-	- [ ] Aplicar Prewitt
-	- [ ] Aplicar Sobel
+- [X] Aplicar detectores de borde sobre imagenes con ruido:
+	- [X] Aplicar Prewitt
+- [X] Aplicar detectores a imagenes con color:
+	- [X] Aplicar Prewitt
 - [X] Implementar operadores direccionales derivados de mascaras en todas las direcciones:
 	- [X] Hacer solamente el A (punto 5)
 - [ ] Implementar los detectores de bordes:
@@ -48,3 +46,17 @@
 	- [ ] Laplaciano del gaussiano (Marr-Hildreth)
 		- [ ] Aplicar a 2 imagenes
 		- [ ] Aplicar a 2 imagenes con ruido
+- [X] Implementar los métodos de Disfusión Isotrópica y Anisotrópica.
+	- [ ] Aplicarlos a imágenes con ruido gaussiano y con ruido sal y pimienta.
+- [ ] Implementar el filtro bilateral.
+	- [ ] Aplicarlo a imágenes con ruido gaussiano y con ruido sal y pimienta. Comparar con los filtros de difusión isotrópica y anisotrópica
+- [ ] Implementar los de umbralización
+	- [ ] Umbralización Global
+		- [] Aplicar a 2 imágenes
+		- [] Aplicar a 2 imágenes con ruido
+	- [ ] Método de umbralización de Otsu
+		- [] Aplicar a 2 imágenes
+		- [] Aplicar a 2 imágenes con ruido
+	- [ ] Método de umbralización de Otsu en imagenes color
+		- [] Aplicar a 2 imágenes
+		- [] Aplicar a 2 imágenes con ruido

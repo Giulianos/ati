@@ -74,6 +74,13 @@ class MenuBar(tk.Menu):
         func_menu.add_cascade(label='Difusión', menu=func_difussion_menu)
         func_difussion_menu.add_command(label='Isotropica', command=parent.funcs.isotropic_difussion)
 
+        # Anisotropic menu
+        difussion_anisotropic_menu = tk.Menu(self, tearoff=0)
+        func_difussion_menu.add_cascade(label='Anisotrópica', menu=difussion_anisotropic_menu)
+        difussion_anisotropic_menu.add_command(label='Detector de Leclerc', command=parent.funcs.anisotropic_leclerc_difussion)
+        difussion_anisotropic_menu.add_command(label='Detector Lorentziano', command=parent.funcs.anisotropic_lorentziano_difussion)
+
+
         ## Info menu
         info_menu = tk.Menu(self, tearoff=0)
         self.add_cascade(label='Info', menu=info_menu)

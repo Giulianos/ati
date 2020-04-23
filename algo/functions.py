@@ -371,6 +371,58 @@ class Functions():
 
         self.app_ref.set_processed(I)
     
+    def isotropic_difussion(self):
+        # ToDo: ask user for parameters
+        times = askinteger("Tiempo", "Tiempo de difusión: ", initialvalue = 1)
+
+        I = self.app_ref.get_processed()
+        g = lambda gradiente: 1
+
+        if utils.img_type(I) == 'RGB':
+            R, G, B = utils.split_bands(I)
+            I = utils.join_bands(
+                anisotropic_difussion(R, g, times, 0.25),
+                anisotropic_difussion(G, g, times, 0.25),
+                anisotropic_difussion(B, g, times, 0.25),
+            )
+        else:
+            I = anisotropic_difussion(I, g, times, 0.25)
+
+        self.app_ref.set_processed(I)
+    
+    def isotropic_difussion(self):
+        self.difussion(lambda grad: 1)
+
+    def anisotropic_leclerc_difussion(self):
+        sigma = askinteger("Detector Leclerc", 'Parámetro sigma:', initialvalue = 0)
+        leclerc_detector = lambda grad: np.exp(-1*(grad**2)/(sigma**2))
+        self.difussion(leclerc_detector)
+    
+    def anisotropic_lorentziano_difussion(self):
+        sigma = askinteger("Detector Leclerc", 'Parámetro sigma:', initialvalue = 0)
+        lorentziano_detector = lambda grad: 1/((grad**2)/(sigma**2) + 1)
+        self.difussion(lorentziano_detector)
+    
+    def difussion(self, g):
+        # ToDo: ask user for parameters
+        times = askinteger("Tiempo", "Tiempo de difusión: ", initialvalue = 1)
+
+        I = self.app_ref.get_processed()
+
+        if utils.img_type(I) == 'RGB':
+            R, G, B = utils.split_bands(I)
+            I = utils.join_bands(
+                anisotropic_difussion(R, g, times, 0.25),
+                anisotropic_difussion(G, g, times, 0.25),
+                anisotropic_difussion(B, g, times, 0.25),
+            )
+        else:
+            I = anisotropic_difussion(I, g, times, 0.25)
+
+        self.app_ref.set_processed(I)
+    
+
+
 def rotative_filter(mask, times=0):
     dim = mask.shape[0]
 

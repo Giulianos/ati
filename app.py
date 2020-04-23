@@ -69,7 +69,7 @@ class App(tk.Tk):
     # it as a NumPy array
     def load_image_from_file(self):
         # Get the image path from the dialog
-        image_path = askopenfilename(filetypes=[('PPM', '.ppm'), ('PGM', '.pgm'), ('RAW', '.raw')])
+        image_path = askopenfilename(filetypes=[('PPM', '.ppm'), ('PGM', '.pgm'), ('RAW', '.raw'), ('BMP', '.bmp')])
 
         # Open the image from the file
         if ".RAW" in image_path or ".raw" in image_path:
@@ -104,7 +104,7 @@ class App(tk.Tk):
         ])
 
         # Save using PIL (format is inferred from extension)
-        img = utils.remap_image(self.img_orig)
+        img = utils.remap_image(self.img_proc)
         Image.fromarray(np.uint8(img)).save(image_path)
 
     # Sets the original image (setting also the processed)
@@ -120,6 +120,9 @@ class App(tk.Tk):
 
         # When loading a new image, load it also in the processed view
         self.set_processed(img.copy())
+    
+    def restore_original(self):
+        self.set_processed(self.get_original())
 
     # Sets the processed image (use this to apply any modification to the image)
     def set_processed(self, img):
@@ -137,7 +140,7 @@ class App(tk.Tk):
         return np.int64(self.img_proc.copy())
 
     def get_original(self):
-        return np.int64(self.img_proc.copy())
+        return np.int64(self.img_orig.copy())
 
     # Mouse handler for processed image
     def on_proc_mouse_move(self, canvas, x, y):

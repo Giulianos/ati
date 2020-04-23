@@ -213,17 +213,34 @@ class Functions():
     # the value of the pixel based on the neighbor
     # pixels on the mask
     def mask(self, maskFunc, mask_dim=None, applying=True):
-        
         if mask_dim == None:
             mask_dim = askinteger("Filtro de mascara", "Tamaño de la mascara (nxn): ", initialvalue = 3)
 
+        I = self.app_ref.get_processed()
+        
+        if utils.img_type(I) == 'RGB':
+            # split and apply mask
+            R, G, B = utils.split_bands(I)
+            I = utils.join_bands(
+                self.mask_gray(R, maskFunc, mask_dim),
+                self.mask_gray(G, maskFunc, mask_dim),
+                self.mask_gray(B, maskFunc, mask_dim),
+            )
+        else:
+            self.mask_gray(I, maskFunc, mask_dim)
+        
+        if applying:
+            self.app_ref.set_processed(I)
+        else:
+            return I
+
+    def mask_gray(self, I, maskFunc, mask_dim):
         #dependiendo del tipo de filtro hago un array con el peso correspondiente
         # lo vamos armando a medida que pasamos por los pixeles (algunos filtros
         # requieren saber el valor de los pixeles para armar la mascara)
         mask = np.zeros((mask_dim, mask_dim))
 
         #imagen a procesar
-        I = self.app_ref.get_processed()
         #imagen que no cambia
         I_ref = np.copy(I)
 
@@ -249,33 +266,43 @@ class Functions():
                 # llamo a la funcion que corresponda dependiendo del filtro
                 I[y,x] = maskFunc(mask)
 
-        if applying:
-            self.app_ref.set_processed(I)
-        else:
-            return I
-        print("Mask Applied!")
+        return I
 
     def horizontal_border(self):
         self.mask(horizontal_filter)
 
     def vertical_border(self):
         self.mask(vertical_filter)
-
+    
     def prewitt_border(self):
-        horzontal_pass = self.mask(horizontal_filter,applying=False)
-        vertical_pass = self.mask(vertical_filter, applying=False)
+        horzontal_pass = self.mask(horizontal_filter, mask_dim=3,applying=False)
+        vertical_pass = self.mask(vertical_filter, mask_dim=3, applying=False)
 
         self.sintetize(horzontal_pass, vertical_pass)
     
-    def sintetize(self, I1, I2, sintetizer_form='max'):
+    def sintetize(self, I1, I2, sintetizer_form='norm'):
+        if utils.img_type(I1) == 'RGB':
+            R1, G1, B1 = utils.split_bands(I1)
+            R2, G2, B2 = utils.split_bands(I2)
+            I = utils.join_bands(
+                self.sintetize_gray(R1, R2),
+                self.sintetize_gray(G1, G2, sintetizer_form=sintetizer_form),
+                self.sintetize_gray(B1, B2, sintetizer_form=sintetizer_form)
+            )
+        else:
+            self.sintetize_gray(I1, I2, sintetizer_form=sintetizer_form)
+        self.app_ref.set_processed(I)
+    
+    def sintetize_gray(self, I1, I2, sintetizer_form='norm'):
         I = np.copy(I1)
         height, width = np.shape(I1)
         for x in range(width):
             for y in range(height):
-                if sintetizer_form == 'max':
-                    I[y, x] = np.maximum(I1[y,x],I2[y,x])
-        	
-        self.app_ref.set_processed(I)
+                # sintetizo con la norma del
+                # vector (I1, I2)
+                if sintetizer_form == 'norm':
+                    I[y, x] = np.linalg.norm((I1[y,x], I2[y,x]))
+        return I	
 
 
 
@@ -369,4 +396,3 @@ def weightedMedianFilter(mask):
                 arr.append(mask[y,x])
 
     return np.median(arr)
-

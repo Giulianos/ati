@@ -352,6 +352,25 @@ class Functions():
         else:
             return I
     
+    def isotropic_difussion(self):
+        # ToDo: ask user for parameters
+        times = askinteger("Tiempo", "Tiempo de difusión: ", initialvalue = 1)
+
+        I = self.app_ref.get_processed()
+        g = lambda gradiente: 1
+
+        if utils.img_type(I) == 'RGB':
+            R, G, B = utils.split_bands(I)
+            I = utils.join_bands(
+                anisotropic_difussion(R, g, times, 0.25),
+                anisotropic_difussion(G, g, times, 0.25),
+                anisotropic_difussion(B, g, times, 0.25),
+            )
+        else:
+            I = anisotropic_difussion(I, g, times, 0.25)
+
+        self.app_ref.set_processed(I)
+    
 def rotative_filter(mask, times=0):
     dim = mask.shape[0]
 
@@ -506,3 +525,38 @@ def weightedMedianFilter(mask):
                 arr.append(mask[y,x])
 
     return np.median(arr)
+
+# Returns N,S,E,W neighbors for pixel
+# (x,y) in img
+def cardinal_neighbors(img, x, y):
+    height, width = np.shape(img)[0:2]
+    neighbors = []
+    neighbors.append(img[y,x + 1] if x + 1 < width else img[y,x])
+    neighbors.append(img[y,x - 1] if x - 1 >= 0 else img[y,x])
+    neighbors.append(img[y + 1,x] if y + 1 < height else img[y,x])
+    neighbors.append(img[y - 1,x] if y - 1 >= height else img[y,x])
+
+    return neighbors
+
+# generic anisotropic difussion (c is the border function)
+def anisotropic_difussion(img, g, times, lambda_param):
+    # It (current)
+    img_curr = np.array(img)
+    # It+1 (next)
+    img_next = np.array(img)
+
+    height, width = np.shape(img)[0:2]
+    for t in range(times):
+        for x in range(width):
+            for y in range(height):
+                sum_next = 0
+                for n in cardinal_neighbors(img_curr, x, y):
+                    d = n - img_curr[y,x]
+                    sum_next += d * g(d)
+                img_next[y,x] = img_curr[y,x] + sum_next*lambda_param
+        # now replace current with next to start next iteration
+        img_curr = img_next
+    
+    print(np.shape(img_curr))
+
+    return img_curr

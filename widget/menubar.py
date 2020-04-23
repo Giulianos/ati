@@ -11,6 +11,7 @@ class MenuBar(tk.Menu):
         self.add_cascade(label='Archivo', menu=file_menu)
         file_menu.add_command(label='Cargar...', command=parent.on_load_image)
         file_menu.add_command(label='Guardar...', command=parent.on_save_image)
+        file_menu.add_command(label='Recargar...', command=parent.reload_image)
 
         ## Generate menu
         gen_menu = tk.Menu(self, tearoff=0)
@@ -63,6 +64,7 @@ class MenuBar(tk.Menu):
         border_menu_detection = tk.Menu(self, tearoff=0)  
         border_menu.add_cascade(label='Metodo de Deteccion', menu=border_menu_detection)
         border_menu_detection.add_command(label='Prewitt', command=parent.funcs.prewitt_border)
+        border_menu_detection.add_command(label='Alternative', command=parent.funcs.alternative_border)
 
         ## Info menu
         info_menu = tk.Menu(self, tearoff=0)

@@ -7,6 +7,8 @@ from tkinter import messagebox
 
 import algo.utils as utils
 
+from functools import partial
+
 class Functions():
     def __init__(self, app_ref):
         self.app_ref = app_ref
@@ -262,21 +264,48 @@ class Functions():
         self.mask(vertical_filter)
 
     def prewitt_border(self):
-        horzontal_pass = self.mask(horizontal_filter,applying=False)
-        vertical_pass = self.mask(vertical_filter, applying=False)
+        filters = [horizontal_filter, vertical_filter]
+        images = []
+        for i in range(2):
+            images.append(self.mask(filters[i], applying=False))
 
-        self.sintetize(horzontal_pass, vertical_pass)
+        self.sintetize(images)
+
+    def alternative_border(self):
+        images = []
+        for i in range(4):
+            images.append(self.mask(partial(rotative_filter, times = i), applying=False))
+
+        self.sintetize(images)
     
-    def sintetize(self, I1, I2, sintetizer_form='max'):
-        I = np.copy(I1)
-        height, width = np.shape(I1)
+    def sintetize(self, images, sintetizer_form='max'):
+        I = np.copy(images[0])
+        height, width = np.shape(images[0])
         for x in range(width):
             for y in range(height):
                 if sintetizer_form == 'max':
-                    I[y, x] = np.maximum(I1[y,x],I2[y,x])
+                    aux_pix = []
+                    for img in images:
+                        aux_pix.append(img[y,x])
+                    I[y, x] = np.linalg.norm(aux_pix)
         	
         self.app_ref.set_processed(I)
 
+def rotative_filter(mask, times=0):
+    dim = mask.shape[0]
+
+    weights = np.ones(mask.shape)
+    mid = np.floor(dim/2)
+    for y in range(dim):
+        if y == mid:
+            for x in range(dim):
+                if x == mid:
+                    weights[y,x] = -2
+        elif y > mid:
+            for x in range(dim):
+                weights[y,x] = -1
+    weights = utils.rotate_matrix3(weights,times)
+    return np.sum(mask*weights)
 
 
 #es el df/dy, supongo que es el vertical

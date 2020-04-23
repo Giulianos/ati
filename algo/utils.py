@@ -81,3 +81,15 @@ def apply_gray_to_rgb(I, func):
     )
 
     return I2
+
+#rotate a 3x3 matrix times *45deg clockwise
+def rotate_matrix3(m,times):
+    m2 = np.array(m)
+    #ordered elements to shift indexes
+    idx_order = [(0,0), (0,1), (0,2), (1,2), (2,2), (2,1), (2,0), (1,0)]
+    for i in range(len(idx_order)):
+        # this works because negative indices
+        # start from the en (index - 1 is the last element)
+        m2[idx_order[i]] = m[idx_order[i-times]]
+
+    return m2

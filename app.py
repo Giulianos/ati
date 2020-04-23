@@ -107,6 +107,10 @@ class App(tk.Tk):
         img = utils.remap_image(self.img_orig)
         Image.fromarray(np.uint8(img)).save(image_path)
 
+    #reload img
+    def reload_image(self):
+        self.set_original(self.img_orig)
+
     # Sets the original image (setting also the processed)
     # this receives a NumPy array image
     def set_original(self, img):

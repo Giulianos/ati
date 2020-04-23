@@ -215,17 +215,34 @@ class Functions():
     # the value of the pixel based on the neighbor
     # pixels on the mask
     def mask(self, maskFunc, mask_dim=None, applying=True):
-        
         if mask_dim == None:
             mask_dim = askinteger("Filtro de mascara", "Tamaño de la mascara (nxn): ", initialvalue = 3)
 
+        I = self.app_ref.get_processed()
+        
+        if utils.img_type(I) == 'RGB':
+            # split and apply mask
+            R, G, B = utils.split_bands(I)
+            I = utils.join_bands(
+                self.mask_gray(R, maskFunc, mask_dim),
+                self.mask_gray(G, maskFunc, mask_dim),
+                self.mask_gray(B, maskFunc, mask_dim),
+            )
+        else:
+            self.mask_gray(I, maskFunc, mask_dim)
+        
+        if applying:
+            self.app_ref.set_processed(I)
+        else:
+            return I
+
+    def mask_gray(self, I, maskFunc, mask_dim):
         #dependiendo del tipo de filtro hago un array con el peso correspondiente
         # lo vamos armando a medida que pasamos por los pixeles (algunos filtros
         # requieren saber el valor de los pixeles para armar la mascara)
         mask = np.zeros((mask_dim, mask_dim))
 
         #imagen a procesar
-        I = self.app_ref.get_processed()
         #imagen que no cambia
         I_ref = np.copy(I)
 
@@ -251,18 +268,14 @@ class Functions():
                 # llamo a la funcion que corresponda dependiendo del filtro
                 I[y,x] = maskFunc(mask)
 
-        if applying:
-            self.app_ref.set_processed(I)
-        else:
-            return I
-        print("Mask Applied!")
+        return I
 
     def horizontal_border(self):
         self.mask(horizontal_filter)
 
     def vertical_border(self):
         self.mask(vertical_filter)
-
+    
     def prewitt_border(self):
         filters = [horizontal_filter, vertical_filter]
         images = []
@@ -278,7 +291,8 @@ class Functions():
 
         self.sintetize(images)
     
-    def sintetize(self, images, sintetizer_form='max'):
+    # Sintetizes one channel
+    def sintetize_gray(self, images, sintetizer_form='max'):
         I = np.copy(images[0])
         height, width = np.shape(images[0])
         for x in range(width):
@@ -289,8 +303,28 @@ class Functions():
                         aux_pix.append(img[y,x])
                     I[y, x] = np.linalg.norm(aux_pix)
         	
-        self.app_ref.set_processed(I)
+        return I
 
+    # if img is gray, sintetizes with sintetize_gray, if
+    # img is rgb, sintetizes each channel with sintetize_gray
+    def sintetize(self, images, sintetizer_form='norm'):
+        if utils.img_type(images[0]) == 'RGB':
+            Rs, Gs, Bs = [], [], []
+            for I in images:
+                R, G, B = utils.split_bands(I)
+                Rs.append(R)
+                Gs.append(G)
+                Bs.append(B)
+
+            I = utils.join_bands(
+                self.sintetize_gray(Rs, sintetizer_form=sintetizer_form),
+                self.sintetize_gray(Gs, sintetizer_form=sintetizer_form),
+                self.sintetize_gray(Bs, sintetizer_form=sintetizer_form)
+            )
+        else:
+            I = self.sintetize_gray(images, sintetizer_form=sintetizer_form)
+        self.app_ref.set_processed(I)
+    
 def rotative_filter(mask, times=0):
     dim = mask.shape[0]
 
@@ -398,4 +432,3 @@ def weightedMedianFilter(mask):
                 arr.append(mask[y,x])
 
     return np.median(arr)
-

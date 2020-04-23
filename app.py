@@ -69,7 +69,7 @@ class App(tk.Tk):
     # it as a NumPy array
     def load_image_from_file(self):
         # Get the image path from the dialog
-        image_path = askopenfilename(filetypes=[('PPM', '.ppm'), ('PGM', '.pgm'), ('RAW', '.raw'), ('BMP', '.bmp')])
+        image_path = askopenfilename(filetypes=[('PPM', '.ppm'), ('PGM', '.pgm'), ('RAW', '.raw'), ('BMP', '.bmp'), ('PNG', '.png')])
 
         # Open the image from the file
         if ".RAW" in image_path or ".raw" in image_path:

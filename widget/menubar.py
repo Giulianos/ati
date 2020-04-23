@@ -54,6 +54,7 @@ class MenuBar(tk.Menu):
         func_menu_filter.add_command(label='Filtro Pasaaltos', command=parent.funcs.high_pass_mask)     
         func_menu_filter.add_command(label='Filtro de la mediana', command=parent.funcs.median_mask)     
         func_menu_filter.add_command(label='Filtro de la mediana ponderada', command=parent.funcs.wmedian_mask)     
+        func_menu_filter.add_command(label='Filtro bilateral', command=parent.funcs.bilateral_mask)     
 
         ## Border menu
         border_menu = tk.Menu(self, tearoff=0)

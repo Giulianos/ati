@@ -210,6 +210,12 @@ class Functions():
 
     def wmedian_mask(self):
         self.mask(weightedMedianFilter, 3)
+    
+    def bilateral_mask(self):
+        ss = askfloat('Filtro Bilateral', 'σ espacial')
+        sr = askfloat('Filtro Bilateral', 'σ color')
+        bilateralFilterWithParams = lambda mask: bilateralFilter(mask, ss, sr)
+        self.mask(bilateralFilterWithParams, mask_dim=int(2*ss+1))
 
     # maskFunc is the function that calculates
     # the value of the pixel based on the neighbor
@@ -612,3 +618,23 @@ def anisotropic_difussion(img, g, times, lambda_param):
     print(np.shape(img_curr))
 
     return img_curr
+
+def bilateralFilter(mask, ss, sr):
+    omega = lambda i,j,k,l: np.exp(
+        -1*(((i-k)**2 + (j-l)**2) / (2*(ss**2))) -
+       ((mask[i,j]-mask[k,l])**2 / (2*(sr**2))) 
+    )
+
+    rows, cols = np.shape(mask)[0:2]
+    i, j = int(rows/2), int(cols/2)
+    denom_sum = 0
+    num_sum = 0
+    for k in range(rows):
+        for l in range(cols):
+            if (i,j) != (k,l):
+                num_sum += mask[k,l]*omega(i,j,k,l)
+                denom_sum += omega(i,j,k,l)
+
+    return num_sum/denom_sum
+
+

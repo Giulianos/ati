@@ -36,10 +36,10 @@
 - [ ] Aplicar detectores a imagenes con color:
 	- [ ] Aplicar Prewitt
 	- [ ] Aplicar Sobel
-- [ ] Implementar operadores direccionales derivados de mascaras en todas las direcciones:
-	- [ ] Hacer solamente el A (punto 5)
+- [X] Implementar operadores direccionales derivados de mascaras en todas las direcciones:
+	- [X] Hacer solamente el A (punto 5)
 - [ ] Implementar los detectores de bordes:
-	- [ ] Laplaciano
+	- [X] Laplaciano
 		- [ ] Aplicar a 2 imagenes
 		- [ ] Aplicar a 2 imagenes con ruido
 	- [ ] Laplaciano mas evaluacion de pendiente

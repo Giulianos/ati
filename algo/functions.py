@@ -291,23 +291,46 @@ class Functions():
 
         self.sintetize(images)
     
+    def laplace_border(self):
+        self.mask(laplace_filter)
+    
+    def laplace_complete_border(self):
+        #Preguntar si quiero max (OR) bordes o min (AND) bordes
+        answer = messagebox.askyesno("Pregunta","Quiere maximizar los bordes encontrados?")
+        #aplico laplace
+        self.mask(laplace_filter)
+
+        filters = [horizontal_zero_check, vertical_zero_check]
+        images = []
+        for i in range(2):
+            images.append(self.mask(filters[i], applying=False))
+
+        self.sintetize(images, sintetizer_form=('or' if answer else 'and'))
+
     # Sintetizes one channel
-    def sintetize_gray(self, images, sintetizer_form='max'):
+    def sintetize_gray(self, images, sintetizer_form='norm'):
         I = np.copy(images[0])
         height, width = np.shape(images[0])
         for x in range(width):
             for y in range(height):
-                if sintetizer_form == 'max':
-                    aux_pix = []
-                    for img in images:
-                        aux_pix.append(img[y,x])
+                aux_pix = []
+                for img in images:
+                    aux_pix.append(img[y,x])
+                if sintetizer_form == 'norm':
                     I[y, x] = np.linalg.norm(aux_pix)
-        	
+                elif sintetizer_form == 'or':
+                    # hardcodeado para 2 imagenes
+                    I[y, x] = (255 if aux_pix[0] == 255 or aux_pix[1] == 255 else 0) 
+                elif sintetizer_form == 'and':
+                    # hardcodeado para 2 imagenes
+                    I[y, x] = (255 if aux_pix[0] == 255 and aux_pix[1] == 255 else 0)
+        
         return I
+
 
     # if img is gray, sintetizes with sintetize_gray, if
     # img is rgb, sintetizes each channel with sintetize_gray
-    def sintetize(self, images, sintetizer_form='norm'):
+    def sintetize(self, images, sintetizer_form='norm', applying=True):
         if utils.img_type(images[0]) == 'RGB':
             Rs, Gs, Bs = [], [], []
             for I in images:
@@ -323,7 +346,11 @@ class Functions():
             )
         else:
             I = self.sintetize_gray(images, sintetizer_form=sintetizer_form)
-        self.app_ref.set_processed(I)
+        
+        if applying:
+            self.app_ref.set_processed(I)
+        else:
+            return I
     
 def rotative_filter(mask, times=0):
     dim = mask.shape[0]
@@ -341,6 +368,53 @@ def rotative_filter(mask, times=0):
     weights = utils.rotate_matrix3(weights,times)
     return np.sum(mask*weights)
 
+def laplace_filter(mask):
+    #creo que siempre son de 3x3, despues lo podemos cambiar para ser mas eficiente
+    dim = mask.shape[0]
+
+    weights = np.ones(mask.shape)
+    mid = np.floor(dim/2)
+    for y in range(dim):
+        for x in range(dim):
+            if (y != mid) and x == mid:
+                    weights[y,x] = -1
+            else:
+                if x == mid:
+                    weights[y,x] = 4
+                else:
+                    weights[y,x] = -1
+    
+    return np.sum(mask*weights)
+
+def vertical_zero_check(mask):
+    #creo que siempre son de 3x3, despues lo podemos cambiar para ser mas eficiente
+    dim = mask.shape[0]
+    mid = int(np.floor(dim/2))
+    
+    ret = mask[mid,mid] * mask[mid+1, mid]
+    if ret < 0:
+        return 255
+    # aca me fijo si estoy en un caso de pixel 0, por lo que evaluo atras y adelante
+    # (Habria que verificar que no nos comemos ningun caso especial)
+    elif mask[mid,mid] == 0:
+        return 255 if (mask[mid-1, mid] * mask[mid+1, mid]) < 0 else 0
+    else:
+        return 0
+
+def horizontal_zero_check(mask):
+    #creo que siempre son de 3x3, despues lo podemos cambiar para ser mas eficiente
+    dim = mask.shape[0]
+    mid = int(np.floor(dim/2))
+    
+    ret = mask[mid,mid] * mask[mid, mid+1]
+    if ret < 0:
+        return 255
+    # aca me fijo si estoy en un caso de pixel 0, por lo que evaluo atras y adelante
+    # (Habria que verificar que no nos comemos ningun caso especial)
+    elif mask[mid,mid] == 0:
+        return 255 if (mask[mid, mid-1] * mask[mid, mid+1]) < 0 else 0
+    else:
+        return 0
 
 #es el df/dy, supongo que es el vertical
 def vertical_filter(mask):

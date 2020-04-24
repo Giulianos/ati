@@ -95,21 +95,27 @@ class Functions():
 
         self.app_ref.set_processed(I)
 
-    def thresholding(self, ask=True, umbral=127, applying=True):
+    def thresholding(self, img=None, retrieveImg=True, ask=True, umbral=127, applying=True):
         if ask:
             thd = askinteger("Umbralizar", "Umbral: ", initialvalue = 127)
         else:
             thd = umbral
-
-        I = self.app_ref.get_processed()
-
-        for pixel in np.nditer(I, op_flags=['readwrite']):
-            pixel[...] = 0 if pixel < thd else 255
-
-        if applying:
-            self.app_ref.set_processed(I)
+        if retrieveImg:
+            I = self.app_ref.get_processed()
         else:
-            return I
+            I = img
+        height, width = np.shape(I)[0:2]
+        print(np.shape(I))
+        Ithd = np.zeros((height, width))
+
+        for x in range(width):
+            for y in range(height):
+                Ithd[y,x] = 0 if I[y,x] < thd else 255
+        
+        if applying:
+            self.app_ref.set_processed(Ithd)
+        else:
+            return Ithd
 
     def gen_gauss(self, mu, desvio):
         return np.random.normal(mu, desvio)
@@ -431,7 +437,7 @@ class Functions():
 
 
     def umbral_otsu(self, I):
-        height, width = np.shape(I)
+        height, width = np.shape(I)[0:2]
         #calculo l histograma normalizado
         unique, counts = np.unique(I, return_counts=True)
         counts = counts/(height*width)
@@ -460,7 +466,7 @@ class Functions():
         result = np.where(var == np.amax(var))
         u = np.mean(result[0])
         print("El umbral calculado es: " + str(u))
-        return self.thresholding(ask=False, umbral=u, applying=False)
+        return self.thresholding(img=I, retrieveImg=False, ask=False, umbral=u, applying=False)
     
     def isotropic_difussion(self):
         # ToDo: ask user for parameters

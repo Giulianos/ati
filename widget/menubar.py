@@ -71,6 +71,11 @@ class MenuBar(tk.Menu):
         border_menu_detection.add_command(label='Laplace Complete', command=parent.funcs.laplace_complete_border)
         border_menu_detection.add_command(label='Laplace Gauss', command=parent.funcs.laplace_gauss_border)
     
+        ## Umbral menu
+        umbral_menu = tk.Menu(self, tearoff=0)
+        self.add_cascade(label='Umbral', menu=umbral_menu)
+        umbral_menu.add_command(label='Umbral Global', command=parent.funcs.umbral_gobal)
+
         # Difussion menu
         func_difussion_menu = tk.Menu(self, tearoff=0)
         func_menu.add_cascade(label='Difusión', menu=func_difussion_menu)

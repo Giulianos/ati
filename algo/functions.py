@@ -377,6 +377,32 @@ class Functions():
             self.app_ref.set_processed(I)
         else:
             return I
+
+    def umbral_gobal(self):
+        #iter over image
+        I = self.app_ref.get_processed()
+
+        u = np.mean(I)
+        #umbralizo y separo en 2 arrays
+        arr1 = []
+        arr2 = []
+        while True:
+            for pixel in np.nditer(I, op_flags=['readwrite']):
+                if pixel <= u:
+                    arr1.append(pixel)
+                else:
+                    arr2.append(pixel)
+            m1 = np.mean(arr1)
+            m2 = np.mean(arr2)
+            u_next = (m1+m2)/2
+            if (u_next-u) <1:
+                break
+            else:
+                u = u_next
+                arr1.clear()
+                arr2.clear()
+
+        print(u)
     
     def isotropic_difussion(self):
         # ToDo: ask user for parameters

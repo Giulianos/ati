@@ -47,16 +47,15 @@
 		- [ ] Aplicar a 2 imagenes
 		- [ ] Aplicar a 2 imagenes con ruido
 - [X] Implementar los métodos de Disfusión Isotrópica y Anisotrópica.
-	- [ ] Aplicarlos a imágenes con ruido gaussiano y con ruido sal y pimienta.
-- [ ] Implementar el filtro bilateral.
-	- [ ] Aplicarlo a imágenes con ruido gaussiano y con ruido sal y pimienta. Comparar con los filtros de difusión isotrópica y anisotrópica
-- [ ] Implementar los de umbralización
+	- [X] Aplicarlos a imágenes con ruido gaussiano y con ruido sal y pimienta.
+- [X] Implementar el filtro bilateral.
+	- [X] Aplicarlo a imágenes con ruido gaussiano y con ruido sal y pimienta. Comparar con los filtros de difusión isotrópica y anisotrópica
+- [X] Implementar los de umbralización
 	- [X] Umbralización Global
-		- [] Aplicar a 2 imágenes
-		- [] Aplicar a 2 imágenes con ruido
+		- [X] Aplicar a 2 imágenes
+		- [X] Aplicar a 2 imágenes con ruido
 	- [X] Método de umbralización de Otsu
-		- [] Aplicar a 2 imágenes
-		- [] Aplicar a 2 imágenes con ruido
-	- [Bug] Método de umbralización de Otsu en imagenes color
-		- [] Aplicar a 2 imágenes
-		- [] Aplicar a 2 imágenes con ruido
+		- [X] Aplicar a 2 imágenes
+		- [X] Aplicar a 2 imágenes con ruido
+	- [X] Método de umbralización de Otsu en imagenes color
+		- [X] Aplicar a 2 imágenes

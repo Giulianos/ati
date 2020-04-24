@@ -75,6 +75,7 @@ class MenuBar(tk.Menu):
         umbral_menu = tk.Menu(self, tearoff=0)
         self.add_cascade(label='Umbral', menu=umbral_menu)
         umbral_menu.add_command(label='Umbral Global', command=parent.funcs.umbral_gobal)
+        umbral_menu.add_command(label='Umbral Otsu', command=parent.funcs.umbral_otsu_wrap)
 
         # Difussion menu
         func_difussion_menu = tk.Menu(self, tearoff=0)

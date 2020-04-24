@@ -40,10 +40,10 @@
 	- [X] Laplaciano
 		- [ ] Aplicar a 2 imagenes
 		- [ ] Aplicar a 2 imagenes con ruido
-	- [ ] Laplaciano mas evaluacion de pendiente
+	- [X] Laplaciano mas evaluacion de pendiente
 		- [ ] Aplicar a 2 imagenes
 		- [ ] Aplicar a 2 imagenes con ruido
-	- [ ] Laplaciano del gaussiano (Marr-Hildreth)
+	- [X] Laplaciano del gaussiano (Marr-Hildreth)
 		- [ ] Aplicar a 2 imagenes
 		- [ ] Aplicar a 2 imagenes con ruido
 - [X] Implementar los métodos de Disfusión Isotrópica y Anisotrópica.
@@ -51,12 +51,12 @@
 - [ ] Implementar el filtro bilateral.
 	- [ ] Aplicarlo a imágenes con ruido gaussiano y con ruido sal y pimienta. Comparar con los filtros de difusión isotrópica y anisotrópica
 - [ ] Implementar los de umbralización
-	- [ ] Umbralización Global
+	- [X] Umbralización Global
 		- [] Aplicar a 2 imágenes
 		- [] Aplicar a 2 imágenes con ruido
-	- [ ] Método de umbralización de Otsu
+	- [X] Método de umbralización de Otsu
 		- [] Aplicar a 2 imágenes
 		- [] Aplicar a 2 imágenes con ruido
-	- [ ] Método de umbralización de Otsu en imagenes color
+	- [Bug] Método de umbralización de Otsu en imagenes color
 		- [] Aplicar a 2 imágenes
 		- [] Aplicar a 2 imágenes con ruido

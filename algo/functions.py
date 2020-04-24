@@ -95,7 +95,7 @@ class Functions():
 
         self.app_ref.set_processed(I)
 
-    def thresholding(self, ask=True, umbral=127):
+    def thresholding(self, ask=True, umbral=127, applying=True):
         if ask:
             thd = askinteger("Umbralizar", "Umbral: ", initialvalue = 127)
         else:
@@ -106,7 +106,10 @@ class Functions():
         for pixel in np.nditer(I, op_flags=['readwrite']):
             pixel[...] = 0 if pixel < thd else 255
 
-        self.app_ref.set_processed(I)
+        if applying:
+            self.app_ref.set_processed(I)
+        else:
+            return I
 
     def gen_gauss(self, mu, desvio):
         return np.random.normal(mu, desvio)
@@ -405,10 +408,58 @@ class Functions():
                 arr1.clear()
                 arr2.clear()
         self.thresholding(ask=False, umbral=u)
-        print(u)
+        print("El umbral utilizado fue: "+ str(u))
 
-    def umbral_otsu(self):
-        return
+    def umbral_otsu_wrap(self):
+        I = self.app_ref.get_processed()
+        if utils.img_type(I) == 'RGB':
+            R, G, B = utils.split_bands(I)
+            print(np.shape(R))
+            print(G)
+            print(B)
+            # ToDo: Resolver problema de join
+            I = utils.join_bands(
+                self.umbral_otsu(R),
+                self.umbral_otsu(G),
+                self.umbral_otsu(B)
+            )
+        else:
+            I = self.umbral_otsu(I)
+        
+        self.app_ref.set_processed(I)
+
+
+    def umbral_otsu(self, I):
+        height, width = np.shape(I)
+        #calculo l histograma normalizado
+        unique, counts = np.unique(I, return_counts=True)
+        counts = counts/(height*width)
+        cumsum = []
+        meansum = []
+        #computo sumas acumuladas
+        i = 0
+        for count in counts:
+            if i != 0:
+                cumsum.append(cumsum[i-1]+count)
+                meansum.append(meansum[i-1]+(count * unique[i]))
+            else:
+                cumsum.append(count)
+                meansum.append(unique[i]*count)
+            i += 1
+
+        var = []
+        i = 0
+        for mean in meansum:
+            if cumsum[i] != 1: 
+                value = ((meansum[-1]*cumsum[i]-mean)**2)/(cumsum[i]*(1-cumsum[i]))
+                var.append(value)
+            
+            i += 1
+
+        result = np.where(var == np.amax(var))
+        u = np.mean(result[0])
+        print("El umbral calculado es: " + str(u))
+        return self.thresholding(ask=False, umbral=u, applying=False)
     
     def isotropic_difussion(self):
         # ToDo: ask user for parameters

@@ -417,7 +417,8 @@ class Functions():
             print(np.shape(R))
             print(G)
             print(B)
-            # ToDo: Resolver problema de join
+            # ToDo: Resolver problema de join, dice que la np.shape(R) le devuelve mas de 2 cosas :S
+            # creo que el problema lo genera esto que deforma el array en threashold for pixel in np.nditer(I, op_flags=['readwrite']):
             I = utils.join_bands(
                 self.umbral_otsu(R),
                 self.umbral_otsu(G),

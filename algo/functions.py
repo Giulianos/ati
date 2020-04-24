@@ -95,8 +95,11 @@ class Functions():
 
         self.app_ref.set_processed(I)
 
-    def thresholding(self):
-        thd = askinteger("Umbralizar", "Umbral: ", initialvalue = 127)
+    def thresholding(self, ask=True, umbral=127):
+        if ask:
+            thd = askinteger("Umbralizar", "Umbral: ", initialvalue = 127)
+        else:
+            thd = umbral
 
         I = self.app_ref.get_processed()
 
@@ -401,8 +404,11 @@ class Functions():
                 u = u_next
                 arr1.clear()
                 arr2.clear()
-
+        self.thresholding(ask=False, umbral=u)
         print(u)
+
+    def umbral_otsu(self):
+        return
     
     def isotropic_difussion(self):
         # ToDo: ask user for parameters

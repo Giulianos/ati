@@ -70,6 +70,12 @@ class MenuBar(tk.Menu):
         border_menu_detection.add_command(label='Laplace', command=parent.funcs.laplace_border)
         border_menu_detection.add_command(label='Laplace Complete', command=parent.funcs.laplace_complete_border)
         border_menu_detection.add_command(label='Laplace Gauss', command=parent.funcs.laplace_gauss_border)
+
+        ## Border advance menu
+        border_menu_advance = tk.Menu(self, tearoff=0)  
+        border_menu.add_cascade(label='Avanzados', menu=border_menu_advance)
+        border_menu_advance.add_command(label="Canny", command=parent.funcs.canny_border)
+        
     
         ## Umbral menu
         umbral_menu = tk.Menu(self, tearoff=0)

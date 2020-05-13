@@ -343,6 +343,31 @@ class Functions():
             images.append(self.mask(filters[i], applying=False))
 
         self.sintetize(images, sintetizer_form=('or' if answer else 'and'))
+    
+    def canny_border(self):
+        # 1. bilateral | podriamos modularizarlo aca
+        #self.bilateral_mask()
+        # 2. magnitud/modelo del gradiente de la img (genera M y Gx y Gy)
+        #M = "sobel"
+        # 3. calculo arctg(gy/gx) y discretizo el angulo y guardo en matriz
+        #if Gx != 0:
+        #    Angulos = arctg(Gy/Gx)
+        #else:
+        #    Angulos = 90
+        #Si Angulos esta entre 0 y 22.5 o 157.5 a 180 --> 0
+        #Si Angulos entre 22.5 y 67.5 --> 45
+        #Si Angulos entre 67.5 y 112.5 --> 90
+        #Si Angulos entre 112.5 y 157.5 --> 135
+        # 4. supresion de no max (sobre M --> M1)
+        #Por cada pixel, miro los adyacentes en su dir correspondiente y si alguno es mayor --> le pongo 0, sino le dejo su valor
+        #Si son iguales, elijo
+        # 5. umbralizacion con  histeresis (sobre M1)
+        #tomo umbral con otsu vy estimo el desvio --> t1=t-desv t2=t+desv (t1<t2)
+        #Elijo empezar horizontal o vertical
+        #Los mayor t2 son borde
+        #Los menor t1 no
+        #Los del medio los tiro con respecto a sus adyacentes (0 o 255)
+        return 0
 
 
     # Sintetizes one channel

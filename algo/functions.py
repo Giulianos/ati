@@ -104,18 +104,16 @@ class Functions():
             I = self.app_ref.get_processed()
         else:
             I = img
-        height, width = np.shape(I)[0:2]
-        print(np.shape(I))
-        Ithd = np.zeros((height, width))
+        height, width = np.shape(I)
 
         for x in range(width):
             for y in range(height):
-                Ithd[y,x] = 0 if I[y,x] < thd else 255
+                I[y,x] = 0 if I[y,x] < thd else 255
         
         if applying:
-            self.app_ref.set_processed(Ithd)
+            self.app_ref.set_processed(I)
         else:
-            return Ithd
+            return I
 
     def gen_gauss(self, mu, desvio):
         return np.random.normal(mu, desvio)
@@ -315,11 +313,13 @@ class Functions():
     def laplace_complete_border(self):
         #Preguntar si quiero max (OR) bordes o min (AND) bordes
         answer = messagebox.askyesno("Pregunta","Quiere maximizar los bordes encontrados?")
+        input_umbral = askinteger("Cruce por 0", "Valor del umbral (u): ", initialvalue = 10)
         #aplico laplace
         self.mask(laplace_filter)
+        
 
         # no usa umbral
-        filters = [horizontal_zero_check, vertical_zero_check]
+        filters = [partial(horizontal_zero_check,u=input_umbral), partial(vertical_zero_check, u=input_umbral)]
         images = []
         for i in range(2):
             images.append(self.mask(filters[i], applying=False))
@@ -420,9 +420,6 @@ class Functions():
         I = self.app_ref.get_processed()
         if utils.img_type(I) == 'RGB':
             R, G, B = utils.split_bands(I)
-            print(np.shape(R))
-            print(G)
-            print(B)
             # ToDo: Resolver problema de join, dice que la np.shape(R) le devuelve mas de 2 cosas :S
             # creo que el problema lo genera esto que deforma el array en threashold for pixel in np.nditer(I, op_flags=['readwrite']):
             I = utils.join_bands(
@@ -437,7 +434,7 @@ class Functions():
 
 
     def umbral_otsu(self, I):
-        height, width = np.shape(I)[0:2]
+        height, width = np.shape(I)
         #calculo l histograma normalizado
         unique, counts = np.unique(I, return_counts=True)
         counts = counts/(height*width)

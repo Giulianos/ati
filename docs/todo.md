@@ -59,3 +59,14 @@
 		- [X] Aplicar a 2 imágenes con ruido
 	- [X] Método de umbralización de Otsu en imagenes color
 		- [X] Aplicar a 2 imágenes
+
+# TP 3
+- [ ] Detector de bordes Canny
+	- [ ] Aplicarlo a 2 imagenes
+	- [ ] Aplicarlo a 2 versiones contaminadas (gaussiano y sal pimienta con p=0.05)
+-[ ] Detector SUSAN
+	- [ ] SUSAN bordes
+	- [ ] SUSAN esquinas
+	- [ ] Aplicarlos
+		- [ ] Aplicarlos a la img TEST
+		- [ ] Aplicarlos a TEST contaminada (gauss y sal pimienta)

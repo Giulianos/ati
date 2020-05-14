@@ -300,6 +300,14 @@ class Functions():
 
         self.sintetize(images)
 
+    def sobel_border(self):
+        filters = [sobel_horizontal_filter, sobel_vertical_filter]
+        images = []
+        for i in range(2):
+            images.append(self.mask(filters[i], applying=False))
+
+        self.sintetize(images)
+
     def alternative_border(self):
         images = []
         for i in range(4):
@@ -677,6 +685,30 @@ def horizontal_filter(mask):
                 weights[y,x] = 1
     
     return np.sum(mask*weights)
+
+def sobel_horizontal_filter(mask):
+    dim = mask.shape[0]
+
+    weights = np.ones(mask.shape)
+    values = [-1,0,1,-2,0,2,-1,0,1]
+    for i in range(dim):
+        for j in range(dim):
+            weights[i,j] = values[(i*dim)+j]
+
+    return np.sum(mask*weights)
+
+def sobel_vertical_filter(mask):
+    dim = mask.shape[0]
+
+    weights = np.ones(mask.shape)
+    values = [-1,-2,-1,0,0,0,1,2,1]
+
+    for i in range(dim):
+        for j in range(dim):
+            weights[i,j] = values[(i*dim)+j]
+
+    return np.sum(mask*weights)
+
 
 # mask is the NxN submatrix
 # of the image centered on the

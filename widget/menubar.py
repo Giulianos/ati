@@ -66,6 +66,7 @@ class MenuBar(tk.Menu):
         border_menu_detection = tk.Menu(self, tearoff=0)  
         border_menu.add_cascade(label='Metodo de Deteccion', menu=border_menu_detection)
         border_menu_detection.add_command(label='Prewitt', command=parent.funcs.prewitt_border)
+        border_menu_detection.add_command(label='Sobel', command=parent.funcs.sobel_border)
         border_menu_detection.add_command(label='Alternative', command=parent.funcs.alternative_border)
         border_menu_detection.add_command(label='Laplace', command=parent.funcs.laplace_border)
         border_menu_detection.add_command(label='Laplace Complete', command=parent.funcs.laplace_complete_border)

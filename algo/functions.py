@@ -96,6 +96,21 @@ class Functions():
 
         self.app_ref.set_processed(I)
 
+    def bi_thresholding(self, img, u1, u2):
+        height, width = np.shape(img)
+        #ToDo: habria que decidir si se pasa horizontal o vertical
+        for x in range(width):
+            for y in range(height):
+                if img[y,x] < u1: 
+                    img[y,x] = 0
+                elif img[y,x] > u2:
+                    img[y,x] = 255
+                else:
+                    #ToDo: tengo que revisar si hay conexion con algun borde al rededor
+                    img[y,x] = img[y,x]
+
+        self.app_ref.set_processed(img)
+
     def thresholding(self, img=None, retrieveImg=True, ask=True, umbral=127, applying=True):
         if ask:
             thd = askinteger("Umbralizar", "Umbral: ", initialvalue = 127)
@@ -361,7 +376,21 @@ class Functions():
             images.append(self.mask(filters[i], applying=False))
 
         self.sintetize(images, sintetizer_form=('or' if answer else 'and'))
-    
+
+    def variableMask(self, mask, dir):
+        dim = mask.shape[0]
+        mid = int(np.floor(dim/2))
+        print(dir)
+        #Estoy tomando como mayor estricto asi que si son iguales tomo como que no es borde. Eso puede estar mal
+        if dir == 0:
+            return mask[mid,mid] if mask[mid,mid] > mask[mid,mid+1] and mask[mid,mid] > mask[mid,mid-1] else 0
+        elif dir == 45:
+            return mask[mid,mid] if mask[mid,mid] > mask[mid+1,mid+1] and mask[mid,mid] > mask[mid-1,mid-1] else 0
+        elif dir == 90:
+            return mask[mid,mid] if mask[mid,mid] > mask[mid+1,mid] and mask[mid,mid] > mask[mid-1,mid] else 0
+        elif dir == 135:
+            return mask[mid,mid] if mask[mid,mid] > mask[mid-1,mid+1] and mask[mid,mid] > mask[mid+1,mid-1] else 0
+
     def canny_border(self):
         # 1. bilateral | podriamos modularizarlo aca
         self.bilateral_mask(ss=2,sr=30)
@@ -391,12 +420,30 @@ class Functions():
         # 4. supresion de no max (sobre M --> M1)
         #Por cada pixel, miro los adyacentes en su dir correspondiente y si alguno es mayor --> le pongo 0, sino le dejo su valor
         #Si son iguales, elijo
+        I_ref = np.copy(M)
+        M1 = np.copy(M)
+        mask_dim = 3
+        mask = np.zeros((mask_dim, mask_dim))
+        #Hago lo mismo que en mask pero tengo que usar una funcion que me permita cambiar la mascara a partir de la direccion del borde
+        for x in range(width):
+            for y in range(height):
+                for i in range(mask_dim):
+                    for j in range(mask_dim):
+                        coordx = x+i-np.floor(mask_dim/2)
+                        coordy = y+j-np.floor(mask_dim/2)
+                        if coordx < 0 or coordy < 0 or coordx >= width or coordy >= height:
+                            mask[i,j] = 0 
+                        else:
+                            mask[i, j] = I_ref[int(coordy), int(coordx)]
+
+                M1[y,x] = self.variableMask(mask, dir[y,x])
+                
         # 5. umbralizacion con  histeresis (sobre M1)
         #tomo umbral con otsu vy estimo el desvio --> t1=t-desv t2=t+desv (t1<t2)
-        #Elijo empezar horizontal o vertical
-        #Los mayor t2 son borde
-        #Los menor t1 no
-        #Los del medio los tiro con respecto a sus adyacentes (0 o 255)
+        ret = self.umbral_otsu(M1,applying=False)
+        t1 = ret[0] - ret[1]
+        t2 = ret[0] + ret[1]
+        self.bi_thresholding(M1,t1,t2)
         return 0
 
 
@@ -488,7 +535,7 @@ class Functions():
         self.app_ref.set_processed(I)
 
 
-    def umbral_otsu(self, I):
+    def umbral_otsu(self, I, applying=True):
         height, width = np.shape(I)
         #calculo l histograma normalizado
         unique, counts = np.unique(I, return_counts=True)
@@ -514,11 +561,14 @@ class Functions():
                 var.append(value)
             
             i += 1
-
-        result = np.where(var == np.amax(var))
+        maxvar = np.amax(var)
+        result = np.where(var == maxvar)
         u = np.mean(result[0])
         print("El umbral calculado es: " + str(u))
-        return self.thresholding(img=I, retrieveImg=False, ask=False, umbral=u, applying=False)
+        if applying:
+            return self.thresholding(img=I, retrieveImg=False, ask=False, umbral=u, applying=False)
+        else:
+            return [u,maxvar**(1/2)]
     
     def isotropic_difussion(self):
         # ToDo: ask user for parameters

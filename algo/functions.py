@@ -1,4 +1,5 @@
 import numpy as np
+import math as mt
 
 from PIL import Image
 
@@ -221,9 +222,11 @@ class Functions():
     def wmedian_mask(self):
         self.mask(weightedMedianFilter, 3)
     
-    def bilateral_mask(self):
-        ss = askfloat('Filtro Bilateral', 'σ espacial')
-        sr = askfloat('Filtro Bilateral', 'σ color')
+    def bilateral_mask(self, ss=None, sr=None):
+        if ss == None:
+            ss = askfloat('Filtro Bilateral', 'σ espacial')
+        if sr == None:
+            sr = askfloat('Filtro Bilateral', 'σ color')
         bilateralFilterWithParams = lambda mask: bilateralFilter(mask, ss, sr)
         self.mask(bilateralFilterWithParams, mask_dim=int(2*ss+1))
 
@@ -300,13 +303,20 @@ class Functions():
 
         self.sintetize(images)
 
-    def sobel_border(self):
+    def sobel_border(self, applying=True, canny=False):
         filters = [sobel_horizontal_filter, sobel_vertical_filter]
         images = []
         for i in range(2):
             images.append(self.mask(filters[i], applying=False))
 
-        self.sintetize(images)
+        if applying:
+            self.sintetize(images)
+        elif canny:
+            images.append(self.sintetize(images, applying=False))
+            return images
+        else:
+            return self.sintetize(images, applying=False)
+
 
     def alternative_border(self):
         images = []
@@ -354,18 +364,30 @@ class Functions():
     
     def canny_border(self):
         # 1. bilateral | podriamos modularizarlo aca
-        #self.bilateral_mask()
+        self.bilateral_mask(ss=2,sr=30)
         # 2. magnitud/modelo del gradiente de la img (genera M y Gx y Gy)
-        #M = "sobel"
+        border_imgs = self.sobel_border(applying=False, canny=True)
+        M = border_imgs.pop()
+        Gy = border_imgs.pop()
+        Gx = border_imgs.pop()
         # 3. calculo arctg(gy/gx) y discretizo el angulo y guardo en matriz
-        #if Gx != 0:
-        #    Angulos = arctg(Gy/Gx)
-        #else:
-        #    Angulos = 90
-        #Si Angulos esta entre 0 y 22.5 o 157.5 a 180 --> 0
-        #Si Angulos entre 22.5 y 67.5 --> 45
-        #Si Angulos entre 67.5 y 112.5 --> 90
-        #Si Angulos entre 112.5 y 157.5 --> 135
+        dir = np.copy(M)
+        height, width = np.shape(M)
+        for x in range(width):
+            for y in range(height):
+                if Gx[y,x] == 0:
+                    dir[y,x] = 90
+                else:
+                    partialDeg = np.rad2deg(mt.atan(Gy[y,x]/Gx[y,x]))
+                    if partialDeg >= 0 and partialDeg < 22.5 or partialDeg > 157.5 and partialDeg <= 180:
+                        dir[y, x] = 0
+                    elif partialDeg >= 22.5 and partialDeg < 67.5:
+                        dir[y, x] = 45
+                    elif partialDeg >= 67.5 and partialDeg < 112.5:
+                        dir[y, x] = 90
+                    elif partialDeg >= 112.5 and partialDeg <= 157.5:
+                        dir[y, x] = 135
+               
         # 4. supresion de no max (sobre M --> M1)
         #Por cada pixel, miro los adyacentes en su dir correspondiente y si alguno es mayor --> le pongo 0, sino le dejo su valor
         #Si son iguales, elijo

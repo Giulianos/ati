@@ -96,20 +96,7 @@ class Functions():
 
         self.app_ref.set_processed(I)
 
-    def bi_thresholding(self, img, u1, u2):
-        height, width = np.shape(img)
-        #ToDo: habria que decidir si se pasa horizontal o vertical
-        for x in range(width):
-            for y in range(height):
-                if img[y,x] < u1: 
-                    img[y,x] = 0
-                elif img[y,x] > u2:
-                    img[y,x] = 255
-                else:
-                    #ToDo: tengo que revisar si hay conexion con algun borde al rededor
-                    img[y,x] = img[y,x]
-
-        self.app_ref.set_processed(img)
+    
 
     def thresholding(self, img=None, retrieveImg=True, ask=True, umbral=127, applying=True):
         if ask:
@@ -248,11 +235,13 @@ class Functions():
     # maskFunc is the function that calculates
     # the value of the pixel based on the neighbor
     # pixels on the mask
-    def mask(self, maskFunc, mask_dim=None, applying=True):
+    def mask(self, maskFunc, img=None, retrieveImg=True, mask_dim=None, applying=True):
         if mask_dim == None:
             mask_dim = askinteger("Filtro de mascara", "Tamaño de la mascara (nxn): ", initialvalue = 3)
-
-        I = self.app_ref.get_processed()
+        if retrieveImg:
+            I = self.app_ref.get_processed()
+        else:
+            I = img
         
         if utils.img_type(I) == 'RGB':
             # split and apply mask
@@ -380,7 +369,6 @@ class Functions():
     def variableMask(self, mask, dir):
         dim = mask.shape[0]
         mid = int(np.floor(dim/2))
-        print(dir)
         #Estoy tomando como mayor estricto asi que si son iguales tomo como que no es borde. Eso puede estar mal
         if dir == 0:
             return mask[mid,mid] if mask[mid,mid] > mask[mid,mid+1] and mask[mid,mid] > mask[mid,mid-1] else 0
@@ -390,6 +378,18 @@ class Functions():
             return mask[mid,mid] if mask[mid,mid] > mask[mid+1,mid] and mask[mid,mid] > mask[mid-1,mid] else 0
         elif dir == 135:
             return mask[mid,mid] if mask[mid,mid] > mask[mid-1,mid+1] and mask[mid,mid] > mask[mid+1,mid-1] else 0
+
+    def thresholding_conexo_8(self, mask, u1, u2):
+        dim = mask.shape[0]
+        mid = int(np.floor(dim/2))
+        value_mid = mask[mid,mid]
+        if value_mid < u1: 
+            return 0
+        elif value_mid > u2:
+            return 255
+        else:
+            conexo = 255 in mask
+            return 255 if conexo else 0 
 
     def canny_border(self):
         # 1. bilateral | podriamos modularizarlo aca
@@ -407,7 +407,8 @@ class Functions():
                 if Gx[y,x] == 0:
                     dir[y,x] = 90
                 else:
-                    partialDeg = np.rad2deg(mt.atan(Gy[y,x]/Gx[y,x]))
+                    partialDeg = np.rad2deg(mt.atan2(Gy[y,x],Gx[y,x]))
+                    partialDeg = partialDeg if partialDeg>=0 else 180+partialDeg
                     if partialDeg >= 0 and partialDeg < 22.5 or partialDeg > 157.5 and partialDeg <= 180:
                         dir[y, x] = 0
                     elif partialDeg >= 22.5 and partialDeg < 67.5:
@@ -443,7 +444,7 @@ class Functions():
         ret = self.umbral_otsu(M1,applying=False)
         t1 = ret[0] - ret[1]
         t2 = ret[0] + ret[1]
-        self.bi_thresholding(M1,t1,t2)
+        self.mask(partial(self.thresholding_conexo_8, u1=t1, u2=t2), retrieveImg=False, img = M1, mask_dim=3)
         return 0
 
 

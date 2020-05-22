@@ -76,6 +76,9 @@ class MenuBar(tk.Menu):
         border_menu_advance = tk.Menu(self, tearoff=0)  
         border_menu.add_cascade(label='Avanzados', menu=border_menu_advance)
         border_menu_advance.add_command(label="Canny", command=parent.funcs.canny_border)
+        border_menu_advance.add_command(label="SUSAN (Bordes)", command=lambda: parent.funcs.susan(borders=True, corners=False))
+        border_menu_advance.add_command(label="SUSAN (Esquinas)", command=lambda: parent.funcs.susan(borders=False, corners=True))
+        border_menu_advance.add_command(label="SUSAN (Ambos)", command=lambda: parent.funcs.susan())
         
     
         ## Umbral menu

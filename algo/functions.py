@@ -626,6 +626,7 @@ class Functions():
         # ToDo: ask user for parameters
         times = askinteger("Tiempo", "Tiempo de difusión: ", initialvalue = 1)
 
+
         I = self.app_ref.get_processed()
 
         if utils.img_type(I) == 'RGB':
@@ -639,6 +640,20 @@ class Functions():
             I = anisotropic_difussion(I, g, times, 0.25)
 
         self.app_ref.set_processed(I)
+
+    def susan(self, borders=True, corners=True):
+        threshold = askinteger("Umbral de color", "Umbral de color: ", initialvalue=27)
+
+        I = self.app_ref.get_processed()
+
+        if utils.img_type(I) == 'RGB':
+            # TODO: implementar para rgb
+            return
+
+        img = susan(np.array(I), threshold, borders, corners)
+        
+        self.app_ref.set_processed(Image.fromarray(img))
+
     
 
 
@@ -937,4 +952,4 @@ def susan(img, threshold=27, borders=True, corners=True):
             if abs(s-0.75) < 0.15 and corners:
                 img2[row, col] = (252, 3, 107)
     
-    return img2
+    return img2.astype('uint8')

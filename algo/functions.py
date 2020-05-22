@@ -109,8 +109,8 @@ class Functions():
             I = img
         height, width = np.shape(I)
 
-        for x in range(width):
-            for y in range(height):
+        for y in range(height):
+            for x in range(width):
                 I[y,x] = 0 if I[y,x] < thd else 255
         
         if applying:
@@ -224,13 +224,16 @@ class Functions():
     def wmedian_mask(self):
         self.mask(weightedMedianFilter, 3)
     
-    def bilateral_mask(self, ss=None, sr=None):
+    def bilateral_mask(self, ss=None, sr=None, applying=True):
         if ss == None:
             ss = askfloat('Filtro Bilateral', 'σ espacial')
         if sr == None:
             sr = askfloat('Filtro Bilateral', 'σ color')
         bilateralFilterWithParams = lambda mask: bilateralFilter(mask, ss, sr)
-        self.mask(bilateralFilterWithParams, mask_dim=int(2*ss+1))
+        if applying:
+            self.mask(bilateralFilterWithParams, mask_dim=int(2*ss+1))
+        else:
+            return self.mask(bilateralFilterWithParams, mask_dim=int(2*ss+1), applying=False)
 
     # maskFunc is the function that calculates
     # the value of the pixel based on the neighbor
@@ -252,7 +255,7 @@ class Functions():
                 self.mask_gray(B, maskFunc, mask_dim),
             )
         else:
-            self.mask_gray(I, maskFunc, mask_dim)
+            I = self.mask_gray(I, maskFunc, mask_dim)
         
         if applying:
             self.app_ref.set_processed(I)
@@ -270,21 +273,21 @@ class Functions():
         I_ref = np.copy(I)
 
         height, width = np.shape(I)
-        for x in range(width):
-            for y in range(height):
-                for i in range(mask_dim):
-                    for j in range(mask_dim):
+        for y in range(height):
+            for x in range(width):
+                for j in range(mask_dim):
+                    for i in range(mask_dim):
                         coordx = x+i-np.floor(mask_dim/2)
                         coordy = y+j-np.floor(mask_dim/2)
                         if coordx < 0 or coordy < 0 or coordx >= width or coordy >= height:
                             #me fui entonces tengo que tomar una decision de las 4 propuestas
-                            mask[i,j] = 0 # relleno con negro
+                            mask[j,i] = 0 # relleno con negro
                         else:
                             # estoy dentro de la imagen
                             # armo la mascara con los valores de los pixeles
                             # (despues llamo a la funcion para que me calcule el
                             # valor del pixel en base a sus vecinos)
-                            mask[i, j] = I_ref[int(coordy), int(coordx)]
+                            mask[j, i] = I_ref[int(coordy), int(coordx)]
 
                 
                 #termine de armar la mascara, cambio el valor del pixel
@@ -307,11 +310,11 @@ class Functions():
 
         self.sintetize(images)
 
-    def sobel_border(self, applying=True, canny=False):
+    def sobel_border(self, applying=True, canny=False, img=None):
         filters = [sobel_horizontal_filter, sobel_vertical_filter]
         images = []
         for i in range(2):
-            images.append(self.mask(filters[i], applying=False))
+            images.append(self.mask(filters[i], applying=False, img=img))
 
         if applying:
             self.sintetize(images)
@@ -370,6 +373,7 @@ class Functions():
         dim = mask.shape[0]
         mid = int(np.floor(dim/2))
         #Estoy tomando como mayor estricto asi que si son iguales tomo como que no es borde. Eso puede estar mal
+        #print(dir)
         if dir == 0:
             return mask[mid,mid] if mask[mid,mid] > mask[mid,mid+1] and mask[mid,mid] > mask[mid,mid-1] else 0
         elif dir == 45:
@@ -390,25 +394,51 @@ class Functions():
         else:
             conexo = 255 in mask
             return 255 if conexo else 0 
+    
+    def thresholding_conexo_4(self, mask, u1, u2):
+        dim = mask.shape[0]
+        mid = int(np.floor(dim/2))
+        value_mid = mask[mid,mid]
+        values = [mask[mid+1,mid], mask[mid,mid+1], mask[mid-1,mid], mask[mid,mid-1]]
+        if value_mid < u1: 
+            return 0
+        elif value_mid >= u2:
+            return 255
+        else:
+            print(str(u1) + " " + str(u2) + " " + str(value_mid))
+            conexo = 255 in values
+            return 255 if conexo else 0 
 
     def canny_border(self):
         # 1. bilateral | podriamos modularizarlo aca
-        self.bilateral_mask(ss=2,sr=30)
+        bilateral_image = self.bilateral_mask(ss=2,sr=30, applying=False)
         # 2. magnitud/modelo del gradiente de la img (genera M y Gx y Gy)
-        border_imgs = self.sobel_border(applying=False, canny=True)
-        M = border_imgs.pop()
-        Gy = border_imgs.pop()
-        Gx = border_imgs.pop()
+        border_imgs = self.sobel_border(applying=False, canny=True, img=bilateral_image)
+
+        #opcion1
+        M = border_imgs[2]
+        Gy = border_imgs[1]
+        Gx = border_imgs[0]
+
+        #opcion2
+        # M = border_imgs[2]
+        # Gx = border_imgs[1]
+        # Gy = border_imgs[0]
+        
         # 3. calculo arctg(gy/gx) y discretizo el angulo y guardo en matriz
         dir = np.copy(M)
         height, width = np.shape(M)
-        for x in range(width):
-            for y in range(height):
+        for y in range(height):
+            for x in range(width):
                 if Gx[y,x] == 0:
-                    dir[y,x] = 90
+                    if Gy[y,x] != 0:
+                        dir[y,x] = 90
+                    else:
+                        dir[y,x] = 0
                 else:
                     partialDeg = np.rad2deg(mt.atan2(Gy[y,x],Gx[y,x]))
                     partialDeg = partialDeg if partialDeg>=0 else 180+partialDeg
+                    #print(partialDeg)
                     if partialDeg >= 0 and partialDeg < 22.5 or partialDeg > 157.5 and partialDeg <= 180:
                         dir[y, x] = 0
                     elif partialDeg >= 22.5 and partialDeg < 67.5:
@@ -417,7 +447,7 @@ class Functions():
                         dir[y, x] = 90
                     elif partialDeg >= 112.5 and partialDeg <= 157.5:
                         dir[y, x] = 135
-               
+        np.savetxt("array.txt", dir, fmt="%s")
         # 4. supresion de no max (sobre M --> M1)
         #Por cada pixel, miro los adyacentes en su dir correspondiente y si alguno es mayor --> le pongo 0, sino le dejo su valor
         #Si son iguales, elijo
@@ -426,25 +456,29 @@ class Functions():
         mask_dim = 3
         mask = np.zeros((mask_dim, mask_dim))
         #Hago lo mismo que en mask pero tengo que usar una funcion que me permita cambiar la mascara a partir de la direccion del borde
-        for x in range(width):
-            for y in range(height):
-                for i in range(mask_dim):
+        for y in range(height):
+            for x in range(width):
+                if M1[y,x] != 0:
                     for j in range(mask_dim):
-                        coordx = x+i-np.floor(mask_dim/2)
-                        coordy = y+j-np.floor(mask_dim/2)
-                        if coordx < 0 or coordy < 0 or coordx >= width or coordy >= height:
-                            mask[i,j] = 0 
-                        else:
-                            mask[i, j] = I_ref[int(coordy), int(coordx)]
+                        for i in range(mask_dim):
+                            coordx = x+i-np.floor(mask_dim/2)
+                            coordy = y+j-np.floor(mask_dim/2)
+                            if coordx < 0 or coordy < 0 or coordx >= width or coordy >= height:
+                                mask[j,i] = 0 
+                            else:
+                                mask[j, i] = I_ref[int(coordy), int(coordx)]
 
-                M1[y,x] = self.variableMask(mask, dir[y,x])
+                    M1[y,x] = self.variableMask(mask, dir[y,x])
                 
         # 5. umbralizacion con  histeresis (sobre M1)
         #tomo umbral con otsu vy estimo el desvio --> t1=t-desv t2=t+desv (t1<t2)
+        #ojo
         ret = self.umbral_otsu(M1,applying=False)
         t1 = ret[0] - ret[1]
+        # t1 = 50
         t2 = ret[0] + ret[1]
-        self.mask(partial(self.thresholding_conexo_8, u1=t1, u2=t2), retrieveImg=False, img = M1, mask_dim=3)
+        # t2 = 100
+        self.mask(partial(self.thresholding_conexo_4, u1=t1, u2=t2), retrieveImg=False, img = M1, mask_dim=3)
         return 0
 
 
@@ -452,8 +486,8 @@ class Functions():
     def sintetize_gray(self, images, sintetizer_form='norm'):
         I = np.copy(images[0])
         height, width = np.shape(images[0])
-        for x in range(width):
-            for y in range(height):
+        for y in range(height):
+            for x in range(width):
                 aux_pix = []
                 for img in images:
                     aux_pix.append(img[y,x])

@@ -887,4 +887,54 @@ def bilateralFilter(mask, ss, sr):
 
     return num_sum/denom_sum
 
+def susan_count(img, row, col, threshold):
+    mask = np.array([
+        [0,0,1,1,1,0,0],
+        [0,1,1,1,1,1,0],
+        [1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1],
+        [0,1,1,1,1,1,0],
+        [0,0,1,1,1,0,0]
+    ])
 
+    count = 0
+    height, width = np.shape(img)[0:2]
+    center_value = int(img[row, col])
+
+    for msk_row in range(7):
+        for msk_col in range(7):
+            if mask[msk_row, msk_col] == 0:
+                continue
+
+            img_row = row+msk_row-3
+            img_col = col+msk_col-3
+
+            if img_row < 0 or img_row >= height or img_col < 0 or img_col >= width:
+                continue
+            
+            count += 1 if abs(center_value - int(img[img_row, img_col])) < threshold else 0
+
+    return count
+
+
+def susan(img, threshold=27, borders=True, corners=True):
+    # paso img a una copia RGB para poder
+    # marcar bordes y esquinas con colores
+    img2 = utils.join_bands(
+            np.array(img),
+            np.array(img),
+            np.array(img)
+        )
+
+    height, width = np.shape(img)
+    
+    for row in range(height):
+        for col in range(width):
+            s = 1.0 - (susan_count(img, row, col, threshold) / 37.0)
+            if abs(s-0.5) < 0.15 and borders:
+                img2[row, col] = (3, 152, 252)
+            if abs(s-0.75) < 0.15 and corners:
+                img2[row, col] = (252, 3, 107)
+    
+    return img2

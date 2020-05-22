@@ -63,7 +63,7 @@ def join_bands(R, G, B):
     if np.shape(R) != np.shape(G) or np.shape(R) != np.shape(B):
         return None
     rows, cols = np.shape(R)
-    I = np.zeros((rows, cols, 3))
+    I = np.zeros((rows, cols, 3), dtype='int')
     for row in range(rows):
         for col in range(cols):
             I[row][col][0] = R[row][col]

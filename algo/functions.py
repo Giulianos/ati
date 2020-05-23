@@ -405,7 +405,6 @@ class Functions():
         elif value_mid >= u2:
             return 255
         else:
-            print(str(u1) + " " + str(u2) + " " + str(value_mid))
             conexo = 255 in values
             return 255 if conexo else 0 
 
@@ -447,11 +446,11 @@ class Functions():
                         dir[y, x] = 90
                     elif partialDeg >= 112.5 and partialDeg <= 157.5:
                         dir[y, x] = 135
-        np.savetxt("array.txt", dir, fmt="%s")
+        np.savetxt("dir.txt", dir, fmt="%s")
+        np.savetxt("sobel.txt", M, fmt="%s")
         # 4. supresion de no max (sobre M --> M1)
         #Por cada pixel, miro los adyacentes en su dir correspondiente y si alguno es mayor --> le pongo 0, sino le dejo su valor
         #Si son iguales, elijo
-        I_ref = np.copy(M)
         M1 = np.copy(M)
         mask_dim = 3
         mask = np.zeros((mask_dim, mask_dim))
@@ -466,20 +465,40 @@ class Functions():
                             if coordx < 0 or coordy < 0 or coordx >= width or coordy >= height:
                                 mask[j,i] = 0 
                             else:
-                                mask[j, i] = I_ref[int(coordy), int(coordx)]
+                                mask[j, i] = M1[int(coordy), int(coordx)]
 
                     M1[y,x] = self.variableMask(mask, dir[y,x])
-                
+
+        np.savetxt("supresion.txt", M1, fmt="%s")        
         # 5. umbralizacion con  histeresis (sobre M1)
         #tomo umbral con otsu vy estimo el desvio --> t1=t-desv t2=t+desv (t1<t2)
         #ojo
         ret = self.umbral_otsu(M1,applying=False)
         t1 = ret[0] - ret[1]
+        print(t1)
         # t1 = 50
         t2 = ret[0] + ret[1]
+        print(t2)
         # t2 = 100
-        self.mask(partial(self.thresholding_conexo_4, u1=t1, u2=t2), retrieveImg=False, img = M1, mask_dim=3)
-        return 0
+        #Aca hay que ver si usamos iRef o no, y sobre que imagen calculamos el umbral.
+        iRef = np.copy(M1)
+        iFinal = np.copy(M1)
+        for y in range(height):
+            for x in range(width):
+                for j in range(mask_dim):
+                    for i in range(mask_dim):
+                        coordx = x+i-np.floor(mask_dim/2)
+                        coordy = y+j-np.floor(mask_dim/2)
+                        if coordx < 0 or coordy < 0 or coordx >= width or coordy >= height:
+                            mask[j,i] = 0 
+                        else:
+                            mask[j, i] = iRef[int(coordy), int(coordx)]
+
+                iFinal[y,x] = self.thresholding_conexo_4(u1=t1, u2=t2, mask=mask)
+
+        self.app_ref.set_processed(iFinal)
+        
+
 
 
     # Sintetizes one channel

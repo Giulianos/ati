@@ -61,12 +61,25 @@
 		- [X] Aplicar a 2 imágenes
 
 # TP 3
-- [ ] Detector de bordes Canny
+- [X] Detector de bordes Canny
 	- [ ] Aplicarlo a 2 imagenes
 	- [ ] Aplicarlo a 2 versiones contaminadas (gaussiano y sal pimienta con p=0.05)
--[ ] Detector SUSAN
-	- [ ] SUSAN bordes
-	- [ ] SUSAN esquinas
+- [X] Detector SUSAN
+	- [X] SUSAN bordes
+	- [X] SUSAN esquinas
 	- [ ] Aplicarlos
 		- [ ] Aplicarlos a la img TEST
 		- [ ] Aplicarlos a TEST contaminada (gauss y sal pimienta)
+- [ ] Transformada de Hough para rectas
+	- [ ] Aplicar a Test
+	- [ ] Aplicar a Test contaminada
+- [ ] Transformada de Hough para circulos (solo para imagen sintetica)
+- [ ] Segmentacion basada en conjuntos de nivel
+	- [ ] Imagenes
+		- [ ] Aplicar a Imagenes estáticas
+		- [ ] Aplicar a verisiones contaminadas
+		- [ ] Explicar cuándo es conveniente utilizar el método?
+	- [ ] Secuencia de imagenes
+		- [ ] Aplicar sobre secuencia con objetivo de hacer seguimiento del objeto
+		- [ ] Estimar tiempo de proceso cuadro a cuadro y evaluar si cumple con los requisitos de tiempo real. (No usar todos los frames en la misma carpeta)
+		- [ ] N2H - se puede hacer la prueba de deteccion de barbijo sobre video en vivo (cámara web)

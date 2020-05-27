@@ -79,7 +79,7 @@ class MenuBar(tk.Menu):
         border_menu_advance.add_command(label="SUSAN (Bordes)", command=lambda: parent.funcs.susan(borders=True, corners=False))
         border_menu_advance.add_command(label="SUSAN (Esquinas)", command=lambda: parent.funcs.susan(borders=False, corners=True))
         border_menu_advance.add_command(label="SUSAN (Ambos)", command=lambda: parent.funcs.susan())
-        
+        border_menu_advance.add_command(label="Contornos Activos", command=parent.funcs.contornos_activos_trigger)
     
         ## Umbral menu
         umbral_menu = tk.Menu(self, tearoff=0)

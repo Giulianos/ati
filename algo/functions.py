@@ -707,7 +707,119 @@ class Functions():
         
         self.app_ref.set_processed(Image.fromarray(img))
 
+    lin = []
+    lout = []
+    phi = None
+
+    def contornos_activos_trigger(self):
+        #PASOS
+        #1 Selecciono region rectangular y defino LIN y LOUT
+        self.semaphore = False
+        self.app_ref.mouse_selection.request_selection(self.selection_prep)
+        
+
+    def contornos_activos_wrap(self, lin, lout, phi):
+        finished = False
+        iterations = 0
+        maxiterations = 10
+        #repito el ciclo hasta que no quede ningun cambio o me quede sin iteraciones
+        while nothing_else == False and iterations < maxiterations:
+            ret_values = contornos_cicle(lin, lout, phi)
+            nothing_else = ret_values[0]
+            lin = ret_values[1]
+            lout = ret_values[2]
+            phi = ret_values[3]
+            iterations += 1
+
+        #voy a tener una matrix que tenga 3 fondo 1 borde out y -1 borde in -3 objeto 
+        return phi
     
+    def contornos_cicle(self, lin, lout, phi):
+        nothing_else = True
+        #2 Para cada LOUT si Fd(x)>0 entonces borro x de LOUT y lo agrego a LIN.
+        for point in lout:
+            #Evalua Fd(x) = log(Norma(caracteristicasfond(x)-caracteristicaspixel(x))/norma(caracteristicasobjeto(x)-caracteristicaspixel(x)))
+            #si f(x)<0 --> x pertenece al fondo
+            if fd(point) > 0:
+                nothing_else = False
+                lout.remove(point)
+                lin.append(point)
+                #2.b Para todo vecino y de x, si matrix(y) = 3, agregar a LOUT y poner matrix(y) =1
+                for y in conexo4(point):
+                    if phi[y] == 3:
+                        lout.append(y)
+                        phi[y] = 1
+                #3 Revisar los pixels en LIN que se transformaron en interiores y los borro de LIN y les pongo matrix(x) = -3
+                #FALTA
+
+        #4 Para cada LIN si Fd(x) < 0 borro de LIN y lo agrego a LOUT.
+        for point in lin:
+            if fd(point) < 0:
+                nothing_else = False
+                lin.remove(point)
+                lout.append(point) 
+                #4.b Para todo vecino y de x con matrix(y) = -3, agregar a LIN y poner matrix(y) = -1
+                for y in conexo4(point):
+                    if phi[y] == -3:
+                        lin.append(y)
+                        phi[y] = -1
+                #5 Revisar los pixels en LOUT que se transformaron en exterior y los borro de LOUT y les pongo matrix(x) = 3
+                #FALTA
+
+        return [nothing_else, lin, lout, phi]
+        
+        
+    def selection_prep(self, start, end):
+        I = self.app_ref.get_processed()
+        x_start, y_start = start
+        x_end, y_end = end
+        height, width = np.shape(I)
+        
+        self.phi = np.copy(I)
+
+        for y in range(height):
+            for x in range(width):
+                if y == y_start+1 or y == y_end-1:
+                    if x > x_start and x < x_end:
+                        self.phi[y,x] = -1
+                        self.lin.append([y,x])
+                    elif x == x_start or x == x_end:
+                        self.phi[y,x] = 1
+                        self.lout.append([y,x])
+                    else:
+                        self.phi[y,x] = 3
+                elif y == y_start or y == y_end:
+                    if x > x_start and x < x_end:
+                        self.phi[y,x] = 1
+                        self.lout.append([y,x])
+                    else:
+                        self.phi[y,x] = 3
+                elif y > y_start and y < y_end:
+                    if x == x_start+1 or x == x_end-1:
+                        self.phi[y,x] = -1
+                        self.lin.append([y,x])
+                    elif x == x_start or x == x_end:
+                        self.phi[y,x] = 1
+                        self.lout.append([y,x])
+                    elif x > x_start and x < x_end:
+                        self.phi[y,x] = -3
+                    else:
+                        self.phi[y,x] = 3
+                elif y < y_start or y > y_end:
+                    self.phi[y,x] = 3
+
+        np.savetxt("phi.txt", self.phi, fmt="%s")
+        contorno = self.contornos_activos_wrap(self, lin=self.lin, lout=self.lout, phi=self.phi)
+        for y in range(height):
+            for x in range(width):
+                if contorno[y,x] == 1:
+                    #Aca habria que elegir cual color usar para marcar el borde
+                    I[y,x] = 255
+    
+        self.app_ref.set_processed(I)
+
+        
+
 
 
 def rotative_filter(mask, times=0):

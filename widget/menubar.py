@@ -81,6 +81,7 @@ class MenuBar(tk.Menu):
         border_menu_advance.add_command(label="SUSAN (Ambos)", command=lambda: parent.funcs.susan())
         border_menu_advance.add_command(label="Contornos Activos", command=parent.funcs.contornos_activos_trigger)
         border_menu_advance.add_command(label="Transf. de Hough (Rectas)", command=parent.funcs.hough_lines)
+        border_menu_advance.add_command(label="Transf. de Hough (Círculos)", command=parent.funcs.hough_circles)
     
         ## Umbral menu
         umbral_menu = tk.Menu(self, tearoff=0)

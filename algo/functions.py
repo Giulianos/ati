@@ -1,5 +1,6 @@
 import numpy as np
 import math as mt
+import heapq as hpq
 
 from PIL import Image
 
@@ -817,9 +818,20 @@ class Functions():
                     I[y,x] = 255
     
         self.app_ref.set_processed(I)
+    
+    def hough_lines(self):
+        theta_step = askinteger("Hough", "Δθ (grados): ", initialvalue=5)
+        rho_step = askinteger("Hough", "Δρ: ", initialvalue=10)
+        epsilon = askfloat("Hough", "ε: ", initialvalue=1.2)
+        threshold = askinteger("Hough", "Umbral: ", initialvalue=30)
 
+        I = self.app_ref.get_processed()
+        if utils.img_type(I) == 'RGB':
+            messagebox.askokcancel('Error', 'La imagen debe ser binaria')
         
+        img = hough_lines(np.array(I), theta_step=theta_step, rho_step=rho_step, epsilon=epsilon, threshold=threshold)
 
+        self.app_ref.set_processed(Image.fromarray(img))
 
 
 def rotative_filter(mask, times=0):
@@ -1118,3 +1130,83 @@ def susan(img, threshold=27, borders=True, corners=True):
                 img2[row, col] = (252, 3, 107)
     
     return img2.astype('uint8')
+
+def hough_lines(
+  img,
+  theta_step=15,
+  rho_step=2,
+  epsilon=1.0,
+  threshold=50,
+  max_lines=None
+):
+  '''
+  Busca rectas en la imagen img (img debe ser binaria)
+  '''
+
+  h, w = np.shape(img)
+  D = np.max([h,w])
+
+  theta_count = int(np.pi/np.deg2rad(theta_step))
+  rho_count = int(2*np.sqrt(2)*D/rho_step)
+  print(theta_count, rho_count)
+
+  # Funciones para pasar de indice a valor
+  idx2theta = lambda idx: idx * np.deg2rad(theta_step) - np.pi/2
+  idx2rho = lambda idx: (idx-rho_count/2) * rho_step
+
+  # Creo la matriz acumulador teniendo en cuenta el rango
+  # de tita y rho y la discretizacion de cada uno
+  A = np.zeros((theta_count, rho_count))
+
+  # Recorro los pixeles blancos y sumo
+  # en los casos que cumplan la ecuacion de la recta
+  for row in range(h):
+    for col in range(w):
+      # Solo miro pixeles blancos
+      if img[row, col] < 255:
+        continue
+
+      for theta_idx in range(theta_count):
+        theta = idx2theta(theta_idx)
+        for rho_idx in range(rho_count):
+          rho = idx2rho(rho_idx)
+
+          # Veo si cumple la ecuacion de la recta
+          if abs(rho - col*np.cos(theta) - row*np.sin(theta)) < epsilon:
+            A[theta_idx, rho_idx] += 1
+  
+  # Busco la cantidad de votaciones del mas votado
+  max_vot = np.max(A)
+  print('La mas votada tiene {} votos'.format(max_vot))
+
+  # Agrego las lineas a una priority queue ordenada por mas votaciones
+  lines = []
+  priority = lambda vot: max_vot - vot
+  for theta_idx in range(theta_count):
+    for rho_idx in range(rho_count):
+      vots = A[theta_idx, rho_idx]
+      if vots >= threshold:
+        p = priority(A[theta_idx, rho_idx]) # prioridad de la linea
+        l = (idx2theta(theta_idx), idx2rho(rho_idx)) # parametros  de la linea
+        hpq.heappush(lines, (p, l))
+  
+  line_count = len(lines) if max_lines is None else np.min([len(lines), max_lines])
+  print('Enconte {} lineas'.format(line_count))
+
+  # Dibujo las rectas con mas puntaje
+  img2 = np.zeros((h,w,3), dtype='uint8') # creo una imagen rgb para dibujar con color las rectas
+  for row in range(h):
+    for col in range(w):
+      # Le asigno el color que tenia pero en RGB
+      v = img[row,col]
+      img2[row, col] = (v,v,v)
+      # Veo si esta en alguna recta para pintarlo
+      for l in range(line_count):
+        theta, rho = lines[l][1]
+        if abs(rho - col*np.cos(theta) - row*np.sin(theta)) < 0.5:
+          # El pixel esta en la recta (lo pinto de rojo)
+          img2[row, col] = (255,0,0)
+          break; # Si ya lo pinte, no sigo viendo si hay mas lineas
+  
+
+  return img2

@@ -832,6 +832,26 @@ class Functions():
         img = hough_lines(np.array(I), theta_step=theta_step, rho_step=rho_step, epsilon=epsilon, threshold=threshold)
 
         self.app_ref.set_processed(Image.fromarray(img))
+    
+    def hough_circles(self):
+        a_step = askinteger("Hough", "Δa: ", initialvalue=5)
+        b_step = askinteger("Hough", "Δb: ", initialvalue=5)
+        r_step = askinteger("Hough", "Δr: ", initialvalue=5)
+        epsilon = askfloat("Hough", "ε: ", initialvalue=1.2)
+        threshold = askinteger("Hough", "Umbral: ", initialvalue=30)
+
+        I = self.app_ref.get_processed()
+        if utils.img_type(I) == 'RGB':
+            messagebox.askokcancel('Error', 'La imagen debe ser binaria')
+        
+        img = hough_circles(
+            np.array(I),
+            a_step=a_step, b_step=b_step, r_step=r_step,
+            epsilon=epsilon,
+            threshold=threshold
+        )
+
+        self.app_ref.set_processed(Image.fromarray(img))
 
 
 def rotative_filter(mask, times=0):
@@ -1208,5 +1228,89 @@ def hough_lines(
           img2[row, col] = (255,0,0)
           break; # Si ya lo pinte, no sigo viendo si hay mas lineas
   
+
+  return img2
+
+def hough_circles(
+  img,
+  a_step=2,
+  b_step=2,
+  r_step=50,
+  epsilon=2,
+  threshold=20,
+  max_circles=None
+):
+  '''
+  Busca circulos en la imagen img (img debe ser binaria)
+  '''
+
+  h, w = np.shape(img)
+  D = np.max([h,w])
+
+  a_count = int(w/a_step) + 1
+  b_count = int(h/b_step) + 1
+  r_count = int(D/r_step)
+
+  # Creo la matriz acumulador
+  A = np.zeros((a_count, b_count, r_count))
+
+  # Recorro los pixeles blancos y sumo
+  # en los casos que cumplan la ecuacion de la circunferencia
+  for row in range(h):
+    for col in range(w):
+      # Solo miro pixeles blancos
+      if img[row, col] < 255:
+        continue
+
+      for a_idx in range(a_count):
+        a = a_idx*a_step
+        for b_idx in range(b_count):
+          b = b_idx * b_step
+          for r_idx in range(r_count):
+            r = (1+r_idx)*r_step
+            # Veo si cumple la ecuacion de la circunferencia
+            if abs(r**2 - (col-a)**2 - (row-b)**2) < epsilon:
+              A[a_idx, b_idx, r_idx] += 1
+  
+  # Busco la cantidad de votaciones del mas votado
+  max_vot = np.max(A)
+  print('La mas votada tiene {} votos'.format(max_vot))
+
+  # Agrego los circulos a una priority queue ordenada por mas votaciones
+  circles = []
+  priority = lambda vot: max_vot - vot
+  for a_idx in range(a_count):
+    a = a_idx*a_step
+    for b_idx in range(b_count):
+      b = b_idx * b_step
+      for r_idx in range(r_count):
+        r = (r_idx+1)*r_step
+        vots = A[a_idx, b_idx, r_idx]
+        if vots >= threshold:
+          p = priority(vots) # prioridad del circulo
+          circ = (a,b,r) # parametros  del circulo
+          hpq.heappush(circles, (p, circ))
+
+
+  circle_count = len(circles) if max_circles is None else np.min([len(circles),max_circles])
+  print('Enconte {} circulos'.format(circle_count))
+
+  for c in range(circle_count):
+    print(circles[c])
+
+  # Dibujo los circulos con mas puntaje
+  img2 = np.zeros((h,w,3), dtype='uint8') # creo una imagen rgb para dibujar con color las rectas
+  for row in range(h):
+    for col in range(w):
+      # Le asigno el color que tenia pero en RGB
+      v = img[row,col]
+      img2[row, col] = (v,v,v)
+      # Veo si esta en alguna recta para pintarlo
+      for l in range(circle_count):
+        a, b, r = circles[l][1]
+        if abs(r**2 - (col-a)**2 - (row-b)**2) < r:
+          # El pixel esta en el circulo (lo pinto de rojo)
+          img2[row, col] = (255,0,0)
+          break; # Si ya lo pinte, no sigo viendo si esta en mas circulos
 
   return img2

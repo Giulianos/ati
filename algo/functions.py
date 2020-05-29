@@ -14,11 +14,11 @@ from functools import partial
 class Functions():
     def __init__(self, app_ref):
         self.app_ref = app_ref
-    
+
     def negative_gray(self, I):
         for pixel in np.nditer(I, op_flags=['readwrite']):
             pixel[...] = np.subtract(255, pixel)
-        
+
         return I
 
     def negative(self):
@@ -32,7 +32,7 @@ class Functions():
             I = self.negative_gray(I)
 
         self.app_ref.set_processed(I)
-    
+
     def multiply_by_scalar(self):
         scalar = askfloat("Multiplicación por escalar", "Escalar: ",
                   initialvalue=1,
@@ -82,7 +82,7 @@ class Functions():
             if cdfmin_temp != 0:
                 cdfmin = cdfmin_temp
                 break
-        
+
         # Count total pixels in image
         N = cdf(255)
 
@@ -97,7 +97,7 @@ class Functions():
 
         self.app_ref.set_processed(I)
 
-    
+
 
     def thresholding(self, img=None, retrieveImg=True, ask=True, umbral=127, applying=True):
         if ask:
@@ -113,7 +113,7 @@ class Functions():
         for y in range(height):
             for x in range(width):
                 I[y,x] = 0 if I[y,x] < thd else 255
-        
+
         if applying:
             self.app_ref.set_processed(I)
         else:
@@ -127,7 +127,7 @@ class Functions():
 
     def gen_exp(self, lamb):
         return np.random.exponential(1/lamb)
-    
+
     def gen_uniform(self, min, max):
         return np.random.uniform(min, max)
 
@@ -136,7 +136,7 @@ class Functions():
                     initialvalue=10)
         p1 = askinteger("Ruido sal y pimienta", "Porcentaje superior: ",
                     initialvalue=10)
-        
+
         #iter over image
         I = self.app_ref.get_processed()
 
@@ -146,7 +146,7 @@ class Functions():
                 pixel[...] = 0
             elif noised >= (100-p1):
                 pixel[...] = 255
-            
+
             #ToDo for RGB
 
         self.app_ref.set_processed(I)
@@ -160,21 +160,21 @@ class Functions():
                   initialvalue=2)
 
         self.apply_noise(percentage, "gauss", "add", mu, desvio)
-        
+
         print("Additive Gauss applied!")
         return 0
-    
+
     def noise_multiplicative_rayleigh(self):
         percentage = askinteger("Ruido rayleigh multiplicativo", "Porcentaje a contaminar: ",
                     initialvalue=10)
         xhi = askfloat("Distribucion Rayleigh", "Variable ξ: ",
                   initialvalue=1)
-        
+
         self.apply_noise(percentage, "rayleigh", "mul", xhi, None)
 
         print("Multiplicative Rayleigh applied!")
         return 0
-    
+
     def noise_multiplicative_exp(self):
         percentage = askinteger("Ruido exponencial multiplicativo", "Porcentaje a contaminar: ",
                     initialvalue=30)
@@ -199,12 +199,12 @@ class Functions():
                     random_number = self.gen_rayleigh(var1)
                 elif op_operation == "gauss":
                     random_number = self.gen_gauss(var1, var2)
-                
+
                 if op_type == "mul":
                     pixel[...] = pixel*random_number
                 elif op_type == "add":
                     pixel[...] = pixel+random_number
-            
+
             #ToDo for RGB
         self.app_ref.set_processed(I)
 
@@ -224,7 +224,7 @@ class Functions():
 
     def wmedian_mask(self):
         self.mask(weightedMedianFilter, 3)
-    
+
     def bilateral_mask(self, ss=None, sr=None, applying=True):
         if ss == None:
             ss = askfloat('Filtro Bilateral', 'σ espacial')
@@ -246,7 +246,7 @@ class Functions():
             I = self.app_ref.get_processed()
         else:
             I = img
-        
+
         if utils.img_type(I) == 'RGB':
             # split and apply mask
             R, G, B = utils.split_bands(I)
@@ -257,7 +257,7 @@ class Functions():
             )
         else:
             I = self.mask_gray(I, maskFunc, mask_dim)
-        
+
         if applying:
             self.app_ref.set_processed(I)
         else:
@@ -290,7 +290,7 @@ class Functions():
                             # valor del pixel en base a sus vecinos)
                             mask[j, i] = I_ref[int(coordy), int(coordx)]
 
-                
+
                 #termine de armar la mascara, cambio el valor del pixel
                 # llamo a la funcion que corresponda dependiendo del filtro
                 I[y,x] = maskFunc(mask)
@@ -302,7 +302,7 @@ class Functions():
 
     def vertical_border(self):
         self.mask(vertical_filter)
-    
+
     def prewitt_border(self):
         filters = [horizontal_filter, vertical_filter]
         images = []
@@ -332,17 +332,17 @@ class Functions():
             images.append(self.mask(partial(rotative_filter, times = i), applying=False))
 
         self.sintetize(images)
-    
+
     def laplace_border(self):
         self.mask(laplace_filter)
-    
+
     def laplace_complete_border(self):
         #Preguntar si quiero max (OR) bordes o min (AND) bordes
         answer = messagebox.askyesno("Pregunta","Quiere maximizar los bordes encontrados?")
         input_umbral = askinteger("Cruce por 0", "Valor del umbral (u): ", initialvalue = 10)
         #aplico laplace
         self.mask(laplace_filter)
-        
+
 
         # no usa umbral
         filters = [partial(horizontal_zero_check,u=input_umbral), partial(vertical_zero_check, u=input_umbral)]
@@ -388,26 +388,26 @@ class Functions():
         dim = mask.shape[0]
         mid = int(np.floor(dim/2))
         value_mid = mask[mid,mid]
-        if value_mid < u1: 
+        if value_mid < u1:
             return 0
         elif value_mid > u2:
             return 255
         else:
             conexo = 255 in mask
-            return 255 if conexo else 0 
-    
+            return 255 if conexo else 0
+
     def thresholding_conexo_4(self, mask, u1, u2):
         dim = mask.shape[0]
         mid = int(np.floor(dim/2))
         value_mid = mask[mid,mid]
         values = [mask[mid+1,mid], mask[mid,mid+1], mask[mid-1,mid], mask[mid,mid-1]]
-        if value_mid < u1: 
+        if value_mid < u1:
             return 0
         elif value_mid >= u2:
             return 255
         else:
             conexo = 255 in values
-            return 255 if conexo else 0 
+            return 255 if conexo else 0
 
     def canny_border(self):
         # 1. bilateral | podriamos modularizarlo aca
@@ -424,7 +424,7 @@ class Functions():
         # M = border_imgs[2]
         # Gx = border_imgs[1]
         # Gy = border_imgs[0]
-        
+
         # 3. calculo arctg(gy/gx) y discretizo el angulo y guardo en matriz
         dir = np.copy(M)
         height, width = np.shape(M)
@@ -464,13 +464,13 @@ class Functions():
                             coordx = x+i-np.floor(mask_dim/2)
                             coordy = y+j-np.floor(mask_dim/2)
                             if coordx < 0 or coordy < 0 or coordx >= width or coordy >= height:
-                                mask[j,i] = 0 
+                                mask[j,i] = 0
                             else:
                                 mask[j, i] = M1[int(coordy), int(coordx)]
 
                     M1[y,x] = self.variableMask(mask, dir[y,x])
 
-        np.savetxt("supresion.txt", M1, fmt="%s")        
+        np.savetxt("supresion.txt", M1, fmt="%s")
         # 5. umbralizacion con  histeresis (sobre M1)
         #tomo umbral con otsu vy estimo el desvio --> t1=t-desv t2=t+desv (t1<t2)
         #ojo
@@ -491,14 +491,14 @@ class Functions():
                         coordx = x+i-np.floor(mask_dim/2)
                         coordy = y+j-np.floor(mask_dim/2)
                         if coordx < 0 or coordy < 0 or coordx >= width or coordy >= height:
-                            mask[j,i] = 0 
+                            mask[j,i] = 0
                         else:
                             mask[j, i] = iRef[int(coordy), int(coordx)]
 
                 iFinal[y,x] = self.thresholding_conexo_4(u1=t1, u2=t2, mask=mask)
 
         self.app_ref.set_processed(iFinal)
-        
+
 
 
 
@@ -515,11 +515,11 @@ class Functions():
                     I[y, x] = np.linalg.norm(aux_pix)
                 elif sintetizer_form == 'or':
                     # hardcodeado para 2 imagenes
-                    I[y, x] = (255 if aux_pix[0] == 255 or aux_pix[1] == 255 else 0) 
+                    I[y, x] = (255 if aux_pix[0] == 255 or aux_pix[1] == 255 else 0)
                 elif sintetizer_form == 'and':
                     # hardcodeado para 2 imagenes
                     I[y, x] = (255 if aux_pix[0] == 255 and aux_pix[1] == 255 else 0)
-        
+
         return I
 
 
@@ -541,7 +541,7 @@ class Functions():
             )
         else:
             I = self.sintetize_gray(images, sintetizer_form=sintetizer_form)
-        
+
         if applying:
             self.app_ref.set_processed(I)
         else:
@@ -586,7 +586,7 @@ class Functions():
             )
         else:
             I = self.umbral_otsu(I)
-        
+
         self.app_ref.set_processed(I)
 
 
@@ -611,10 +611,10 @@ class Functions():
         var = []
         i = 0
         for mean in meansum:
-            if cumsum[i] != 1: 
+            if cumsum[i] != 1:
                 value = ((meansum[-1]*cumsum[i]-mean)**2)/(cumsum[i]*(1-cumsum[i]))
                 var.append(value)
-            
+
             i += 1
         maxvar = np.amax(var)
         result = np.where(var == maxvar)
@@ -624,7 +624,7 @@ class Functions():
             return self.thresholding(img=I, retrieveImg=False, ask=False, umbral=u, applying=False)
         else:
             return [u,maxvar**(1/2)]
-    
+
     def isotropic_difussion(self):
         # ToDo: ask user for parameters
         times = askinteger("Tiempo", "Tiempo de difusión: ", initialvalue = 1)
@@ -643,7 +643,7 @@ class Functions():
             I = anisotropic_difussion(I, g, times, 0.25)
 
         self.app_ref.set_processed(I)
-    
+
     def isotropic_difussion(self):
         # ToDo: ask user for parameters
         times = askinteger("Tiempo", "Tiempo de difusión: ", initialvalue = 1)
@@ -662,7 +662,7 @@ class Functions():
             I = anisotropic_difussion(I, g, times, 0.25)
 
         self.app_ref.set_processed(I)
-    
+
     def isotropic_difussion(self):
         self.difussion(lambda grad: 1)
 
@@ -670,12 +670,12 @@ class Functions():
         sigma = askinteger("Detector Leclerc", 'Parámetro sigma:', initialvalue = 0)
         leclerc_detector = lambda grad: np.exp(-1*(grad**2)/(sigma**2))
         self.difussion(leclerc_detector)
-    
+
     def anisotropic_lorentziano_difussion(self):
         sigma = askinteger("Detector Leclerc", 'Parámetro sigma:', initialvalue = 0)
         lorentziano_detector = lambda grad: 1/((grad**2)/(sigma**2) + 1)
         self.difussion(lorentziano_detector)
-    
+
     def difussion(self, g):
         # ToDo: ask user for parameters
         times = askinteger("Tiempo", "Tiempo de difusión: ", initialvalue = 1)
@@ -705,7 +705,7 @@ class Functions():
             return
 
         img = susan(np.array(I), threshold, borders, corners)
-        
+
         self.app_ref.set_processed(Image.fromarray(img))
 
     lin = []
@@ -713,17 +713,19 @@ class Functions():
     phi = None
     img = None
     object_avg = None
+    background_avg = None
 
+    # Flujo paso 1
     def contornos_activos_trigger(self):
         #PASOS
         #1 Selecciono region rectangular y defino LIN y LOUT
         self.semaphore = False
         self.app_ref.mouse_selection.request_selection(self.selection_prep)
-        
+
 
     def contornos_activos_wrap(self, lin, lout, phi,width,height):
         iterations = 0
-        maxiterations = 10
+        maxiterations = 400
         nothing_else = False
         #repito el ciclo hasta que no quede ningun cambio o me quede sin iteraciones
         while nothing_else == False and iterations < maxiterations:
@@ -734,9 +736,26 @@ class Functions():
             phi = ret_values[3]
             iterations += 1
 
-        #voy a tener una matrix que tenga 3 fondo 1 borde out y -1 borde in -3 objeto 
+        #voy a tener una matrix que tenga 3 fondo 1 borde out y -1 borde in -3 objeto
         return phi
-    
+
+    def update_avgs(self):
+        height, width = np.shape(self.phi)
+        obj_sum = 0
+        bg_sum = 0
+        obj_n = 0
+        bg_n = 0
+        for y in range(height):
+            for x in range(width):
+                if self.phi[y,x] == -3:
+                    obj_sum += self.img[y, x]
+                    obj_n += 1
+                elif self.phi[y,x] == 3:
+                    bg_sum += self.img[y, x]
+                    bg_n += 1
+        self.object_avg = obj_sum/obj_n if obj_n > 0 else 0
+        self.background_avg = bg_sum/bg_n if bg_n > 0 else 0
+
     def contornos_cicle(self, lin, lout, phi, width, height):
         nothing_else = True
         #2 Para cada LOUT si Fd(x)>0 entonces borro x de LOUT y lo agrego a LIN.
@@ -747,35 +766,61 @@ class Functions():
                 nothing_else = False
                 lout.remove(point)
                 lin.append(point)
+                phi[point[0],point[1]] = -1
                 #2.b Para todo vecino y de x, si matrix(y) = 3, agregar a LOUT y poner matrix(y) =1
                 for aux_point in self.conexo4(point, width, height):
                     if phi[aux_point[0],aux_point[1]] == 3:
                         lout.append(aux_point)
                         phi[aux_point[0],aux_point[1]] = 1
-                #3 Revisar los pixels en LIN que se transformaron en interiores y los borro de LIN y les pongo matrix(x) = -3
-                #FALTA
+        #3 Revisar los pixels en LIN que se transformaron en interiores y los borro de LIN y les pongo matrix(x) = -3
+        new_interior = []
+        for x in lin:
+            # miro si cumple la definicion de lin
+            belongs_lin = False
+            for y in self.conexo4(x, width, height):
+                if phi[y[0], y[1]] > 0:
+                    belongs_lin = True
+            if not belongs_lin:
+                new_interior.append(x)
+        for x in new_interior:
+            lin.remove(x)
+            phi[x[0],x[1]] = -3
 
         #4 Para cada LIN si Fd(x) < 0 borro de LIN y lo agrego a LOUT.
         for point in lin:
             if self.fd(self.img[point[0],point[1]]) == False:
                 nothing_else = False
                 lin.remove(point)
-                lout.append(point) 
+                lout.append(point)
+                phi[point[0],point[1]] = 1
                 #4.b Para todo vecino y de x con matrix(y) = -3, agregar a LIN y poner matrix(y) = -1
                 for aux_point in self.conexo4(point, width, height):
                     if phi[aux_point[0],aux_point[1]] == -3:
                         lin.append(aux_point)
                         phi[aux_point[0],aux_point[1]] = -1
-                #5 Revisar los pixels en LOUT que se transformaron en exterior y los borro de LOUT y les pongo matrix(x) = 3
-                #FALTA
+        #5 Revisar los pixels en LOUT que se transformaron en exterior y los borro de LOUT y les pongo matrix(x) = 3
+        new_exterior = []
+        for x in lout:
+            # miro si cumple la definicion de lout
+            belongs_lout = False
+            for y in self.conexo4(x, width, height):
+                if phi[y[0], y[1]] < 0:
+                    belongs_lout = True
+            if not belongs_lout:
+                new_exterior.append(x)
+        for x in new_exterior:
+            lout.remove(x)
+            phi[x[0], x[1]] = 3
 
         return [nothing_else, lin, lout, phi]
 
     #ToDo: cambiar por comentario para color
     def fd(self,pixel):
-        value = 1 - np.linalg.norm(pixel - self.object_avg) / 256
-        #value = 1 - np.linalg.norm(pixel - self.object_avg) / (np.sqrt(3)*256)
-        return value >= 0.8
+        # value = 1 - np.linalg.norm(pixel - self.object_avg) / 256 # (gray)
+        p_obj = 1 - np.linalg.norm(pixel - self.object_avg) / (256**2 * 2)
+        p_bg = 1 - np.linalg.norm(pixel - self.background_avg) / (256**2 * 2)
+        value = np.log(p_obj/p_bg)
+        return value > 0
 
     def conexo4(self, point, width, height):
         directions = [[1,0],[0,1],[-1,0],[0,-1]]
@@ -787,19 +832,19 @@ class Functions():
                 break
             else:
                 neighbors.append([int(coordy), int(coordx)])
-        
+
         return neighbors
 
-
+    # Flujo paso 2 (esto se llama con la seleccion ya hecha)
     def selection_prep(self, start, end):
         I = self.app_ref.get_processed()
+
         x_start, y_start = start
         x_end, y_end = end
-        height, width = np.shape(I)
-        
-        self.phi = np.copy(I)
+        height, width = np.shape(I)[0:2]
+
+        self.phi = np.zeros((height, width))
         self.img = np.copy(I)
-        object_pixels = []
 
         for y in range(height):
             for x in range(width):
@@ -827,25 +872,31 @@ class Functions():
                         self.lout.append([y,x])
                     elif x > x_start and x < x_end:
                         self.phi[y,x] = -3
-                        object_pixels.append(I[y,x])
                     else:
                         self.phi[y,x] = 3
                 elif y < y_start or y > y_end:
                     self.phi[y,x] = 3
 
-        #ToDo: cambiar por comentario para color
-        #self.object_avg = np.mean(object_pixels, axis=0)
-        self.object_avg = np.average(object_pixels)
-        np.savetxt("phi.txt", self.phi, fmt="%s")
+        # ToDo: cambiar por comentario para color
+        self.update_avgs()
+        # np.savetxt("phi.txt", self.phi, fmt="%s")
         contorno = self.contornos_activos_wrap(lin=self.lin, lout=self.lout, phi=self.phi, width=width,height=height)
+
+        # Una vez que tengo los contornos, los marco en la imagen
+        if utils.img_type(I) == 'GRAY': # si la imagen es de grises...
+            # me armo una imagen rgb
+            I = utils.join_bands(I,I,I)
+
         for y in range(height):
             for x in range(width):
-                if contorno[y,x] == 1:
-                    #Aca habria que elegir cual color usar para marcar el borde
-                    I[y,x] = 255
-    
+                if contorno[y, x] == 1:
+                    I[y, x] = (0, 0, 255) # azul para lout
+                elif contorno[y, x] == -1:
+                    I[y, x] = (255, 0, 0) # rojo para lin
+                # alguno de los dos contornos se va a ver ;)
+
         self.app_ref.set_processed(I)
-    
+
     def hough_lines(self):
         theta_step = askinteger("Hough", "Δθ (grados): ", initialvalue=5)
         rho_step = askinteger("Hough", "Δρ: ", initialvalue=10)
@@ -855,11 +906,11 @@ class Functions():
         I = self.app_ref.get_processed()
         if utils.img_type(I) == 'RGB':
             messagebox.askokcancel('Error', 'La imagen debe ser binaria')
-        
+
         img = hough_lines(np.array(I), theta_step=theta_step, rho_step=rho_step, epsilon=epsilon, threshold=threshold)
 
         self.app_ref.set_processed(Image.fromarray(img))
-    
+
     def hough_circles(self):
         a_step = askinteger("Hough", "Δa: ", initialvalue=5)
         b_step = askinteger("Hough", "Δb: ", initialvalue=5)
@@ -870,7 +921,7 @@ class Functions():
         I = self.app_ref.get_processed()
         if utils.img_type(I) == 'RGB':
             messagebox.askokcancel('Error', 'La imagen debe ser binaria')
-        
+
         img = hough_circles(
             np.array(I),
             a_step=a_step, b_step=b_step, r_step=r_step,
@@ -913,14 +964,14 @@ def laplace_filter(mask):
                     weights[y,x] = 4
                 else:
                     weights[y,x] = -1
-    
+
     return np.sum(mask*weights)
 
 def vertical_zero_check(mask, u=0):
     #creo que siempre son de 3x3, despues lo podemos cambiar para ser mas eficiente
     dim = mask.shape[0]
     mid = int(np.floor(dim/2))
-    
+
     #ToDo: Hay que agregar el umbral para la pendiente |a|+|b| > U
     mid_pix = mask[mid,mid]
     next_pix = mask[mid+1, mid]
@@ -941,7 +992,7 @@ def horizontal_zero_check(mask, u=0):
     #creo que siempre son de 3x3, despues lo podemos cambiar para ser mas eficiente
     dim = mask.shape[0]
     mid = int(np.floor(dim/2))
-    
+
     #ToDo: Hay que agregar el umbral para la pendiente |a|+|b| > U
     mid_pix = mask[mid,mid]
     next_pix = mask[mid, mid+1]
@@ -975,7 +1026,7 @@ def vertical_filter(mask):
         if y > mid_row:
             for x in range(dim):
                 weights[y,x] = 1
-    
+
     return np.sum(mask*weights)
 
 #es el df/dx, supongo que es el horizontal
@@ -995,7 +1046,7 @@ def horizontal_filter(mask):
         if x > mid_col:
             for y in range(dim):
                 weights[y,x] = 1
-    
+
     return np.sum(mask*weights)
 
 def sobel_horizontal_filter(mask):
@@ -1045,9 +1096,9 @@ def gaussianFilter(mask, stdv):
             relY = y-np.floor(dim/2)
 
             weights[y,x] = (1/(2*np.pi*stdv**2))*np.exp(-(relX**2 + relY**2)/(stdv**2))
-    
+
     weights = weights/np.sum(weights)
-    
+
     return np.sum(mask*weights)
 
 def highPassFilter(mask):
@@ -1103,7 +1154,7 @@ def anisotropic_difussion(img, g, times, lambda_param):
                 img_next[y,x] = img_curr[y,x] + sum_next*lambda_param
         # now replace current with next to start next iteration
         img_curr = img_next
-    
+
     print(np.shape(img_curr))
 
     return img_curr
@@ -1111,7 +1162,7 @@ def anisotropic_difussion(img, g, times, lambda_param):
 def bilateralFilter(mask, ss, sr):
     omega = lambda i,j,k,l: np.exp(
         -1*(((i-k)**2 + (j-l)**2) / (2*(ss**2))) -
-       ((mask[i,j]-mask[k,l])**2 / (2*(sr**2))) 
+       ((mask[i,j]-mask[k,l])**2 / (2*(sr**2)))
     )
 
     rows, cols = np.shape(mask)[0:2]
@@ -1151,7 +1202,7 @@ def susan_count(img, row, col, threshold):
 
             if img_row < 0 or img_row >= height or img_col < 0 or img_col >= width:
                 continue
-            
+
             count += 1 if abs(center_value - int(img[img_row, img_col])) < threshold else 0
 
     return count
@@ -1167,7 +1218,7 @@ def susan(img, threshold=27, borders=True, corners=True):
         )
 
     height, width = np.shape(img)
-    
+
     for row in range(height):
         for col in range(width):
             s = 1.0 - (susan_count(img, row, col, threshold) / 37.0)
@@ -1175,7 +1226,7 @@ def susan(img, threshold=27, borders=True, corners=True):
                 img2[row, col] = (3, 152, 252)
             if abs(s-0.75) < 0.15 and corners:
                 img2[row, col] = (252, 3, 107)
-    
+
     return img2.astype('uint8')
 
 def hough_lines(
@@ -1221,7 +1272,7 @@ def hough_lines(
           # Veo si cumple la ecuacion de la recta
           if abs(rho - col*np.cos(theta) - row*np.sin(theta)) < epsilon:
             A[theta_idx, rho_idx] += 1
-  
+
   # Busco la cantidad de votaciones del mas votado
   max_vot = np.max(A)
   print('La mas votada tiene {} votos'.format(max_vot))
@@ -1236,7 +1287,7 @@ def hough_lines(
         p = priority(A[theta_idx, rho_idx]) # prioridad de la linea
         l = (idx2theta(theta_idx), idx2rho(rho_idx)) # parametros  de la linea
         hpq.heappush(lines, (p, l))
-  
+
   line_count = len(lines) if max_lines is None else np.min([len(lines), max_lines])
   print('Enconte {} lineas'.format(line_count))
 
@@ -1254,7 +1305,7 @@ def hough_lines(
           # El pixel esta en la recta (lo pinto de rojo)
           img2[row, col] = (255,0,0)
           break; # Si ya lo pinte, no sigo viendo si hay mas lineas
-  
+
 
   return img2
 
@@ -1298,7 +1349,7 @@ def hough_circles(
             # Veo si cumple la ecuacion de la circunferencia
             if abs(r**2 - (col-a)**2 - (row-b)**2) < epsilon:
               A[a_idx, b_idx, r_idx] += 1
-  
+
   # Busco la cantidad de votaciones del mas votado
   max_vot = np.max(A)
   print('La mas votada tiene {} votos'.format(max_vot))

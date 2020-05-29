@@ -80,9 +80,10 @@
 		- [ ] Aplicar a verisiones contaminadas
 		- [ ] Explicar cuándo es conveniente utilizar el método?
 	- [X] Secuencia de imagenes
-		- [X] Aplicar sobre secuencia con objetivo de hacer seguimiento del objeto
+		- [X] Aplicar sobre secuencia con objetivo de hacer seguimiento del objeto (con la opcion "Cargar Video...", seleccionar todas las imagenes que forman el video)
 		- [X] Estimar tiempo de proceso cuadro a cuadro y evaluar si cumple con los requisitos de tiempo real.
 		- [ ] N2H - se puede hacer la prueba de deteccion de barbijo sobre video en vivo (cámara web)
 		
 	NOTA: en nuestra implementacion el tiempo de procesamiento es alto por lo que fue mas sencillo incluir botones
 	para avanzar y retroceder. (Compare con otros dos grupos y tambien tenian un tiempo de procesamiento alto)
+	Tuve que instalar tambien una libreria (natsort) para poder levantar los archivos en orden.

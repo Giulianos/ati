@@ -771,9 +771,10 @@ class Functions():
 
         return [nothing_else, lin, lout, phi]
 
-    #ToDo: configurar para color
+    #ToDo: cambiar por comentario para color
     def fd(self,pixel):
         value = 1 - np.linalg.norm(pixel - self.object_avg) / 256
+        #value = 1 - np.linalg.norm(pixel - self.object_avg) / (np.sqrt(3)*256)
         return value >= 0.8
 
     def conexo4(self, point, width, height):
@@ -798,7 +799,6 @@ class Functions():
         
         self.phi = np.copy(I)
         self.img = np.copy(I)
-        #ToDo: configurar para color
         object_pixels = []
 
         for y in range(height):
@@ -833,6 +833,8 @@ class Functions():
                 elif y < y_start or y > y_end:
                     self.phi[y,x] = 3
 
+        #ToDo: cambiar por comentario para color
+        #self.object_avg = np.mean(object_pixels, axis=0)
         self.object_avg = np.average(object_pixels)
         np.savetxt("phi.txt", self.phi, fmt="%s")
         contorno = self.contornos_activos_wrap(lin=self.lin, lout=self.lout, phi=self.phi, width=width,height=height)

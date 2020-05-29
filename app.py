@@ -212,6 +212,7 @@ class App(tk.Tk):
         self.set_original(self.frames[self.current_frame].copy())
         self.set_processed(self.frames[self.current_frame].copy())
         # TODO: trigger tracking algorithm (if tracking is on)
+        self.funcs.run_contornos_activos(self.get_original().copy())
         self.update_video_controls()
 
     def on_video_backward(self):
@@ -219,6 +220,7 @@ class App(tk.Tk):
         self.set_original(self.frames[self.current_frame].copy())
         self.set_processed(self.frames[self.current_frame].copy())
         # TODO: trigger tracking algorithm (if tracking is on)
+        self.funcs.run_contornos_activos(self.get_original().copy())
         self.update_video_controls()
 
     def update_video_controls(self):

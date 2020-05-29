@@ -1,6 +1,7 @@
 import numpy as np
 import math as mt
 import heapq as hpq
+import time
 
 from PIL import Image
 
@@ -715,6 +716,14 @@ class Functions():
     object_avg = None
     background_avg = None
 
+    def reset_contornos_activos_globals(self):
+        self.lin = []
+        self.lout = []
+        self.phi = None
+        self. img = None
+        self.object_avg = None
+        self.background_avg = None
+
     # Flujo paso 1
     def contornos_activos_trigger(self):
         #PASOS
@@ -725,7 +734,7 @@ class Functions():
 
     def contornos_activos_wrap(self, lin, lout, phi,width,height):
         iterations = 0
-        maxiterations = 400
+        maxiterations = 10
         nothing_else = False
         #repito el ciclo hasta que no quede ningun cambio o me quede sin iteraciones
         while nothing_else == False and iterations < maxiterations:
@@ -737,6 +746,7 @@ class Functions():
             iterations += 1
 
         #voy a tener una matrix que tenga 3 fondo 1 borde out y -1 borde in -3 objeto
+        print(iterations)
         return phi
 
     def update_avgs(self):
@@ -837,7 +847,11 @@ class Functions():
 
     # Flujo paso 2 (esto se llama con la seleccion ya hecha)
     def selection_prep(self, start, end):
-        I = self.app_ref.get_processed()
+        if self.app_ref.video_mode:
+            I = self.app_ref.get_original()
+        else:
+            self.reset_contornos_activos_globals()
+            I = self.app_ref.get_processed()
 
         x_start, y_start = start
         x_end, y_end = end
@@ -877,22 +891,29 @@ class Functions():
                 elif y < y_start or y > y_end:
                     self.phi[y,x] = 3
 
-        # ToDo: cambiar por comentario para color
+        self.run_contornos_activos(I)
+
+    def run_contornos_activos(self, I):
         self.update_avgs()
-        # np.savetxt("phi.txt", self.phi, fmt="%s")
-        contorno = self.contornos_activos_wrap(lin=self.lin, lout=self.lout, phi=self.phi, width=width,height=height)
+        self.img = np.copy(I)
+
+        height, width = np.shape(self.phi)[0:2]
+        start = int(round(time.time() * 1000))
+        contorno = self.contornos_activos_wrap(lin=self.lin, lout=self.lout, phi=self.phi, width=width, height=height)
+        end = int(round(time.time() * 1000))
+        print('El cuadro se proceso en {}ms'.format(end-start))
 
         # Una vez que tengo los contornos, los marco en la imagen
-        if utils.img_type(I) == 'GRAY': # si la imagen es de grises...
+        if utils.img_type(I) == 'GRAY':  # si la imagen es de grises...
             # me armo una imagen rgb
-            I = utils.join_bands(I,I,I)
+            I = utils.join_bands(I, I, I)
 
         for y in range(height):
             for x in range(width):
                 if contorno[y, x] == 1:
-                    I[y, x] = (0, 0, 255) # azul para lout
+                    I[y, x] = (0, 0, 255)  # azul para lout
                 elif contorno[y, x] == -1:
-                    I[y, x] = (255, 0, 0) # rojo para lin
+                    I[y, x] = (255, 0, 0)  # rojo para lin
                 # alguno de los dos contornos se va a ver ;)
 
         self.app_ref.set_processed(I)

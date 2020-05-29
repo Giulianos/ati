@@ -67,19 +67,22 @@
 - [X] Detector SUSAN
 	- [X] SUSAN bordes
 	- [X] SUSAN esquinas
-	- [ ] Aplicarlos
-		- [ ] Aplicarlos a la img TEST
-		- [ ] Aplicarlos a TEST contaminada (gauss y sal pimienta)
-- [ ] Transformada de Hough para rectas
-	- [ ] Aplicar a Test
-	- [ ] Aplicar a Test contaminada
-- [ ] Transformada de Hough para circulos (solo para imagen sintetica)
-- [ ] Segmentacion basada en conjuntos de nivel
-	- [ ] Imagenes
-		- [ ] Aplicar a Imagenes estáticas
+	- [X] Aplicarlos
+		- [X] Aplicarlos a la img TEST
+		- [X] Aplicarlos a TEST contaminada (gauss y sal pimienta)
+- [X] Transformada de Hough para rectas
+	- [X] Aplicar a Test
+	- [X] Aplicar a Test contaminada
+- [X] Transformada de Hough para circulos (solo para imagen sintetica)
+- [X] Segmentacion basada en conjuntos de nivel
+	- [X] Imagenes
+		- [ ] Aplicar a Imagenes estáticas (Hice un par de pruebas pero no las guarde, igual no tarda nada)
 		- [ ] Aplicar a verisiones contaminadas
 		- [ ] Explicar cuándo es conveniente utilizar el método?
-	- [ ] Secuencia de imagenes
-		- [ ] Aplicar sobre secuencia con objetivo de hacer seguimiento del objeto
-		- [ ] Estimar tiempo de proceso cuadro a cuadro y evaluar si cumple con los requisitos de tiempo real. (No usar todos los frames en la misma carpeta)
+	- [X] Secuencia de imagenes
+		- [X] Aplicar sobre secuencia con objetivo de hacer seguimiento del objeto
+		- [X] Estimar tiempo de proceso cuadro a cuadro y evaluar si cumple con los requisitos de tiempo real.
 		- [ ] N2H - se puede hacer la prueba de deteccion de barbijo sobre video en vivo (cámara web)
+		
+	NOTA: en nuestra implementacion el tiempo de procesamiento es alto por lo que fue mas sencillo incluir botones
+	para avanzar y retroceder. (Compare con otros dos grupos y tambien tenian un tiempo de procesamiento alto)

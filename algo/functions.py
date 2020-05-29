@@ -891,10 +891,10 @@ class Functions():
                 elif y < y_start or y > y_end:
                     self.phi[y,x] = 3
 
+        self.update_avgs()
         self.run_contornos_activos(I)
 
     def run_contornos_activos(self, I):
-        self.update_avgs()
         self.img = np.copy(I)
 
         height, width = np.shape(self.phi)[0:2]

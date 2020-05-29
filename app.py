@@ -99,7 +99,7 @@ class App(tk.Tk):
     def load_video_from_file(self):
         # Get the image path from the dialog
         paths = askopenfilenames(
-            filetypes=[('PPM', '.ppm'), ('PGM', '.pgm'), ('BMP', '.bmp'), ('PNG', '.png'), ('JPG', '.jpg')]
+            filetypes=[('PPM', '.ppm'), ('PGM', '.pgm'), ('BMP', '.bmp'), ('PNG', '.png'), ('JPG', '.jpg'), ('JPG', '.jpeg')]
         )
 
         # ordeno los archivos
@@ -206,13 +206,15 @@ class App(tk.Tk):
         self.video_mode = True
         if len(self.frames) > 1:
             self.video_forward.configure(state=tk.NORMAL)
+        # Restart tracking (if running)
+        self.funcs.reset_contornos_activos_globals()
 
     def on_video_forward(self):
         self.current_frame += 1
         self.set_original(self.frames[self.current_frame].copy())
         self.set_processed(self.frames[self.current_frame].copy())
-        # TODO: trigger tracking algorithm (if tracking is on)
-        self.funcs.run_contornos_activos(self.get_original().copy())
+        if not self.funcs.phi is None:
+            self.funcs.run_contornos_activos(self.get_original().copy())
         self.update_video_controls()
 
     def on_video_backward(self):
@@ -220,7 +222,8 @@ class App(tk.Tk):
         self.set_original(self.frames[self.current_frame].copy())
         self.set_processed(self.frames[self.current_frame].copy())
         # TODO: trigger tracking algorithm (if tracking is on)
-        self.funcs.run_contornos_activos(self.get_original().copy())
+        if not self.funcs.phi is None:
+            self.funcs.run_contornos_activos(self.get_original().copy())
         self.update_video_controls()
 
     def update_video_controls(self):

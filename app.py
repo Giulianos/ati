@@ -1,5 +1,6 @@
 import tkinter as tk
-from tkinter.filedialog import askopenfilename, asksaveasfilename
+import natsort # para ordenar los nombres de las imagenes en videos
+from tkinter.filedialog import askopenfilename, asksaveasfilename, askopenfilenames
 from tkinter.simpledialog import askinteger
 
 import numpy as np
@@ -61,15 +62,22 @@ class App(tk.Tk):
         self.iv_proc.set_mouse_leave_handler(self.on_proc_mouse_leave)
         self.iv_proc.set_mouse_selection(self.mouse_selection)
 
+        # Add video controls
+        self.video_backward = tk.Button(self, text=' << ', command=self.on_video_backward, state=tk.DISABLED)
+        self.video_forward = tk.Button(self, text=' >> ', command=self.on_video_forward, state=tk.DISABLED)
+        self.video_forward.grid(row=2, column=1)
+        self.video_backward.grid(row=2, column=0)
+        self.video_mode_active = False
+
         # Add StatusBar
         self.statusbar = StatusBar(self)
-        self.statusbar.grid(row=2, column=0, columnspan=2, sticky=tk.E+tk.W)
+        self.statusbar.grid(row=3, column=0, columnspan=2, sticky=tk.E+tk.W)
 
     # This loads an image from a file and returns
     # it as a NumPy array
     def load_image_from_file(self):
         # Get the image path from the dialog
-        image_path = askopenfilename(filetypes=[('PPM', '.ppm'), ('PGM', '.pgm'), ('RAW', '.raw'), ('BMP', '.bmp'), ('PNG', '.png')])
+        image_path = askopenfilename(filetypes=[('PPM', '.ppm'), ('PGM', '.pgm'), ('RAW', '.raw'), ('BMP', '.bmp'), ('PNG', '.png'), ('JPG', '.jpg')])
 
         # Open the image from the file
         if ".RAW" in image_path or ".raw" in image_path:
@@ -87,11 +95,38 @@ class App(tk.Tk):
 
         return np.array(img)
 
+
+    def load_video_from_file(self):
+        # Get the image path from the dialog
+        paths = askopenfilenames(
+            filetypes=[('PPM', '.ppm'), ('PGM', '.pgm'), ('BMP', '.bmp'), ('PNG', '.png'), ('JPG', '.jpg')]
+        )
+
+        # ordeno los archivos
+        paths = natsort.natsorted(list(paths))
+
+        frames = []
+        for path in paths:
+            frame = np.array(Image.open(path))
+            frames.append(frame)
+
+        return frames
+
     # This function is called
     # when the load button is pressed
     def on_load_image(self):
         # Load into app
+        self.video_mode = False
         self.set_original(self.load_image_from_file())
+
+    # This function is called
+    # when the load button is pressed
+    def on_load_video(self):
+        # Load into app
+        self.frames = self.load_video_from_file()
+        self.current_frame = 0
+        self.enable_video_mode()
+        self.set_original(self.get_original())
 
     # This functions is called
     # when the save button is pressed
@@ -144,6 +179,9 @@ class App(tk.Tk):
         return np.int64(self.img_proc.copy())
 
     def get_original(self):
+        if self.video_mode:
+            return np.int64(self.frames[self.current_frame].copy())
+
         return np.int64(self.img_orig.copy())
 
     # Mouse handler for processed image
@@ -163,3 +201,32 @@ class App(tk.Tk):
     def on_proc_mouse_leave(self, event):
         self.statusbar.hide_coords()
         self.statusbar.hide_color()
+
+    def enable_video_mode(self):
+        self.video_mode = True
+        if len(self.frames) > 1:
+            self.video_forward.configure(state=tk.NORMAL)
+
+    def on_video_forward(self):
+        self.current_frame += 1
+        self.set_original(self.frames[self.current_frame].copy())
+        self.set_processed(self.frames[self.current_frame].copy())
+        # TODO: trigger tracking algorithm (if tracking is on)
+        self.update_video_controls()
+
+    def on_video_backward(self):
+        self.current_frame -= 1
+        self.set_original(self.frames[self.current_frame].copy())
+        self.set_processed(self.frames[self.current_frame].copy())
+        # TODO: trigger tracking algorithm (if tracking is on)
+        self.update_video_controls()
+
+    def update_video_controls(self):
+        if self.current_frame == 0:
+            self.video_backward.configure(state=tk.DISABLED)
+        else:
+            self.video_backward.configure(state=tk.NORMAL)
+        if self.current_frame == len(self.frames) - 1:
+            self.video_forward.configure(state=tk.DISABLED)
+        else:
+            self.video_forward.configure(state=tk.NORMAL)

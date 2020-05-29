@@ -11,6 +11,7 @@ class MenuBar(tk.Menu):
         self.add_cascade(label='Archivo', menu=file_menu)
         file_menu.add_command(label='Restaurar original', command=parent.restore_original)
         file_menu.add_command(label='Cargar...', command=parent.on_load_image)
+        file_menu.add_command(label='Cargar video...', command=parent.on_load_video)
         file_menu.add_command(label='Guardar...', command=parent.on_save_image)
         file_menu.add_command(label='Recargar...', command=parent.reload_image)
 

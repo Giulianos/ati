@@ -847,10 +847,10 @@ class Functions():
 
     # Flujo paso 2 (esto se llama con la seleccion ya hecha)
     def selection_prep(self, start, end):
+        self.reset_contornos_activos_globals()
         if self.app_ref.video_mode:
             I = self.app_ref.get_original()
         else:
-            self.reset_contornos_activos_globals()
             I = self.app_ref.get_processed()
 
         x_start, y_start = start

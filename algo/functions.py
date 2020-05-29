@@ -711,6 +711,8 @@ class Functions():
     lin = []
     lout = []
     phi = None
+    img = None
+    object_avg = None
 
     def contornos_activos_trigger(self):
         #PASOS
@@ -719,13 +721,13 @@ class Functions():
         self.app_ref.mouse_selection.request_selection(self.selection_prep)
         
 
-    def contornos_activos_wrap(self, lin, lout, phi):
-        finished = False
+    def contornos_activos_wrap(self, lin, lout, phi,width,height):
         iterations = 0
         maxiterations = 10
+        nothing_else = False
         #repito el ciclo hasta que no quede ningun cambio o me quede sin iteraciones
         while nothing_else == False and iterations < maxiterations:
-            ret_values = contornos_cicle(lin, lout, phi)
+            ret_values = self.contornos_cicle(lin, lout, phi,width,height)
             nothing_else = ret_values[0]
             lin = ret_values[1]
             lout = ret_values[2]
@@ -735,41 +737,59 @@ class Functions():
         #voy a tener una matrix que tenga 3 fondo 1 borde out y -1 borde in -3 objeto 
         return phi
     
-    def contornos_cicle(self, lin, lout, phi):
+    def contornos_cicle(self, lin, lout, phi, width, height):
         nothing_else = True
         #2 Para cada LOUT si Fd(x)>0 entonces borro x de LOUT y lo agrego a LIN.
         for point in lout:
             #Evalua Fd(x) = log(Norma(caracteristicasfond(x)-caracteristicaspixel(x))/norma(caracteristicasobjeto(x)-caracteristicaspixel(x)))
             #si f(x)<0 --> x pertenece al fondo
-            if fd(point) > 0:
+            if self.fd(self.img[point[0],point[1]]):
                 nothing_else = False
                 lout.remove(point)
                 lin.append(point)
                 #2.b Para todo vecino y de x, si matrix(y) = 3, agregar a LOUT y poner matrix(y) =1
-                for y in conexo4(point):
-                    if phi[y] == 3:
-                        lout.append(y)
-                        phi[y] = 1
+                for aux_point in self.conexo4(point, width, height):
+                    if phi[aux_point[0],aux_point[1]] == 3:
+                        lout.append(aux_point)
+                        phi[aux_point[0],aux_point[1]] = 1
                 #3 Revisar los pixels en LIN que se transformaron en interiores y los borro de LIN y les pongo matrix(x) = -3
                 #FALTA
 
         #4 Para cada LIN si Fd(x) < 0 borro de LIN y lo agrego a LOUT.
         for point in lin:
-            if fd(point) < 0:
+            if self.fd(self.img[point[0],point[1]]) == False:
                 nothing_else = False
                 lin.remove(point)
                 lout.append(point) 
                 #4.b Para todo vecino y de x con matrix(y) = -3, agregar a LIN y poner matrix(y) = -1
-                for y in conexo4(point):
-                    if phi[y] == -3:
-                        lin.append(y)
-                        phi[y] = -1
+                for aux_point in self.conexo4(point, width, height):
+                    if phi[aux_point[0],aux_point[1]] == -3:
+                        lin.append(aux_point)
+                        phi[aux_point[0],aux_point[1]] = -1
                 #5 Revisar los pixels en LOUT que se transformaron en exterior y los borro de LOUT y les pongo matrix(x) = 3
                 #FALTA
 
         return [nothing_else, lin, lout, phi]
+
+    #ToDo: configurar para color
+    def fd(self,pixel):
+        value = 1 - np.linalg.norm(pixel - self.object_avg) / 256
+        return value >= 0.8
+
+    def conexo4(self, point, width, height):
+        directions = [[1,0],[0,1],[-1,0],[0,-1]]
+        neighbors = []
+        for direc in directions:
+            coordy = point[0] + direc[0]
+            coordx = point[1] + direc[1]
+            if coordx < 0 or coordy < 0 or coordx >= width or coordy >= height:
+                break
+            else:
+                neighbors.append([int(coordy), int(coordx)])
         
-        
+        return neighbors
+
+
     def selection_prep(self, start, end):
         I = self.app_ref.get_processed()
         x_start, y_start = start
@@ -777,6 +797,9 @@ class Functions():
         height, width = np.shape(I)
         
         self.phi = np.copy(I)
+        self.img = np.copy(I)
+        #ToDo: configurar para color
+        object_pixels = []
 
         for y in range(height):
             for x in range(width):
@@ -804,13 +827,15 @@ class Functions():
                         self.lout.append([y,x])
                     elif x > x_start and x < x_end:
                         self.phi[y,x] = -3
+                        object_pixels.append(I[y,x])
                     else:
                         self.phi[y,x] = 3
                 elif y < y_start or y > y_end:
                     self.phi[y,x] = 3
 
+        self.object_avg = np.average(object_pixels)
         np.savetxt("phi.txt", self.phi, fmt="%s")
-        contorno = self.contornos_activos_wrap(self, lin=self.lin, lout=self.lout, phi=self.phi)
+        contorno = self.contornos_activos_wrap(lin=self.lin, lout=self.lout, phi=self.phi, width=width,height=height)
         for y in range(height):
             for x in range(width):
                 if contorno[y,x] == 1:

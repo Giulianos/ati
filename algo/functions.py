@@ -952,6 +952,37 @@ class Functions():
 
         self.app_ref.set_processed(Image.fromarray(img))
 
+    def harris(self):
+        img = self.app_ref.get_processed()
+
+        if utils.img_type(img) == 'RGB':
+            messagebox.askokcancel('To do!', 'Falta la implementacion para RGB')
+
+        ix, iy = get_ix_iy(img, 3)
+        ix2 = harris_gauss(ix**2)
+        iy2 = harris_gauss(iy**2)
+        ixy = harris_gauss(ix*iy)
+
+        k = 0.04
+        r = (ix2 * iy2 - ixy ** 2) - k * (ix2 + iy2) ** 2
+
+        r_umbral = r >= 10
+
+        # me armo una imagen rgb a partir de img
+        # para marcar con color las esquinas
+        img_rgb = utils.join_bands(
+            img,
+            img,
+            img
+        )
+
+        for row in range(r_umbral.shape[0]):
+            for col in range(r_umbral.shape[1]):
+                if r_umbral[row, col]:
+                    img_rgb[row, col] = (0, 255, 0) # pinto de verde
+
+        self.app_ref.set_processed(img_rgb)
+
 
 def rotative_filter(mask, times=0):
     dim = mask.shape[0]
@@ -1413,3 +1444,51 @@ def hough_circles(
           break; # Si ya lo pinte, no sigo viendo si esta en mas circulos
 
   return img2
+
+# me recorta una imagen de tamaño mdimxmdim centrada en las coordenadas pasadaas
+# (para get_ix_iy)
+def sub_image(img, center_row, center_col, mdim):
+    subimg = np.zeros((mdim, mdim))
+    h, w = img.shape[0:2]
+
+    for mrow in range(mdim):
+        row = center_row - mdim // 2 + mrow
+        for mcol in range(mdim):
+            col = center_col - mdim // 2 + mcol
+            if row < 0 or row >= h or col < 0 or col >= w:
+                subimg[mrow, mcol] = 0
+            else:
+                subimg[mrow, mcol] = img[row, col]
+
+    return subimg
+
+# me devuelve Ix e Iy (para Harris)
+def get_ix_iy(img, mdim=3):
+    h, w = img.shape[0:2]
+
+    ix = np.zeros((h,w))
+    iy = np.zeros((h,w))
+
+    for row in range(h):
+        for col in range(w):
+            subimg = sub_image(img, row, col, mdim)
+            ix[row, col] = sobel_horizontal_filter(subimg)
+            iy[row, col] = sobel_vertical_filter(subimg)
+
+    return ix, iy
+
+# Filtro gauss usado en el metodo harris
+# (es el mismo filtro que ya implementamos pero
+# con los parametros que pide Harris)
+def harris_gauss(img):
+    mdim = 3
+    sigma = 2
+    h, w = img.shape[0:2]
+    img_gauss = np.zeros((h, w))
+
+    for row in range(h):
+        for col in range(w):
+            subimg = sub_image(img, row, col, mdim)
+            img_gauss[row, col] = gaussianFilter(subimg, sigma)
+
+    return img_gauss

@@ -3,9 +3,13 @@ import math as mt
 import heapq as hpq
 import time
 
+from cv2 import cv2 
+import matplotlib.pyplot as plt
+
 from PIL import Image
 
 from tkinter.simpledialog import askfloat, askinteger
+from tkinter.filedialog import askopenfilenames
 from tkinter import messagebox
 
 import algo.utils as utils
@@ -982,6 +986,34 @@ class Functions():
                     img_rgb[row, col] = (0, 255, 0) # pinto de verde
 
         self.app_ref.set_processed(img_rgb)
+
+    def sift(self):
+
+        paths = askopenfilenames(
+            filetypes=[('PNG', '.png'), ('JPG', '.jpg'), ('JPG', '.jpeg')]
+        )
+
+        img1 = cv2.imread(paths[0])  
+        img2 = cv2.imread(paths[1])
+
+        img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
+        img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
+
+        #sift
+        sift = cv2.xfeatures2d.SIFT_create()
+
+        keypoints_1, descriptors_1 = sift.detectAndCompute(img1,None)
+        keypoints_2, descriptors_2 = sift.detectAndCompute(img2,None)
+
+        #feature matching
+        bf = cv2.BFMatcher(cv2.NORM_L2, crossCheck=True)
+
+        matches = bf.match(descriptors_1,descriptors_2)
+        matches = sorted(matches, key = lambda x:x.distance)
+
+        img3 = cv2.drawMatches(img1, keypoints_1, img2, keypoints_2, matches[:50], img2, flags=2)
+        plt.imshow(img3)
+        plt.show()
 
 
 def rotative_filter(mask, times=0):

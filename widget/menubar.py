@@ -88,7 +88,12 @@ class MenuBar(tk.Menu):
         self.add_cascade(label='Esquinas', menu=corner_menu)
         corner_menu.add_command(label="SUSAN", command=lambda: parent.funcs.susan(borders=False, corners=True))
         corner_menu.add_command(label='Harris', command=parent.funcs.harris)
-    
+
+        ## Compare advance menu
+        compare_menu = tk.Menu(self, tearoff=0)
+        self.add_cascade(label='Comparar', menu=compare_menu)  
+        compare_menu.add_command(label='SIFT', command=parent.funcs.sift)
+
         ## Umbral menu
         umbral_menu = tk.Menu(self, tearoff=0)
         self.add_cascade(label='Umbral', menu=umbral_menu)
